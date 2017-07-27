@@ -13,6 +13,7 @@ from pathlib import Path
 from statistics import mean, median, stdev
 
 import appdirs
+
 import dateutil.parser
 
 import pyutils.misc
@@ -177,7 +178,8 @@ class HTMLStripper(HTMLParser):
 def time_fmt(t=None, local=False, fmt='iso8601'):
     """Format time represented as seconds since the epoch."""
     formats = dict(
-        iso8601='%Y-%m-%dT%H:%M %z',  # '%Y-%m-%dT%H:%M:%S%z'
+        iso8601='%Y-%m-%dT%H:%M %z',
+        isofull='%Y-%m-%dT%H:%M:%S%z',
         isodate='%Y-%m-%d',
         rfc2822='%a, %d %b %Y %H:%M %z',
         locale='%c',
@@ -185,7 +187,8 @@ def time_fmt(t=None, local=False, fmt='iso8601'):
     if fmt in formats:
         fmt = formats[fmt]
     if t is None:
-        t = time.time()
+        # t = time.time()
+        return str(t)
     if isinstance(t, datetime.datetime):
         if fmt == 'compactdate':
             fmt = '%m-%d'
