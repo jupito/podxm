@@ -4,12 +4,16 @@ import logging
 from pathlib import Path
 
 import jsonfile
+
 import media
+
 import pyutils.files
 import pyutils.misc
-import synd
-import util
 from pyutils.misc import fmt_size
+
+import synd
+
+import util
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
@@ -184,7 +188,9 @@ def show_entry(entry, verbose=0):
     lst = []
     if verbose:
         lst.extend([
-            (util.time_fmt(entry.date, fmt='rfc2822'), 'Date'),
+            # (util.time_fmt(entry.date_published, fmt='rfc2822'), 'Date'),
+            (util.time_fmt(entry.date_published, fmt='isofull'), "Publ'd"),
+            (util.time_fmt(entry.date_seen, fmt='isofull'), 'Seen'),
             (entry.score, 'Score'),
             (entry.flag.name, 'Flag'),
             (entry.guid, 'GUID'),
