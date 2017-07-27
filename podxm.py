@@ -125,7 +125,7 @@ class Proc(object):
         if orphans:
             write_pathlist(orphans, path)
 
-    def cmd_download(self):
+    def cmd_dl(self):
         """Download enclosures. Using --force forces download even against feed
         settings.
         """
@@ -139,7 +139,7 @@ class Proc(object):
         for entry in self.generate_entries():
             common.download_enclosures(entry, self.args.maxsize)
 
-    def cmd_normalize(self):
+    def cmd_norm(self):
         """Normalize enclosure loudness. Using --force re-normalizes."""
         for entry in self.generate_entries():
             common.normalize_enclosures(entry, self.args.force)
@@ -235,8 +235,8 @@ class Proc(object):
             refresh='cmd_refresh',
             check='cmd_check',
             setflag='cmd_setflag',
-            dl='cmd_download',
-            norm='cmd_normalize',
+            dl='cmd_dl',
+            norm='cmd_norm',
             ui='cmd_ui',
             show_feed='show_feed',
             show_entry='show_entry',
