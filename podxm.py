@@ -12,11 +12,15 @@ from itertools import chain
 from pathlib import Path
 
 import common
-import synd
-import ui_cmd
-import util
-from pyutils.files import valid_lines, tempfile_and_backup
+
+from pyutils.files import tempfile_and_backup, valid_lines
 from pyutils.misc import fmt_size, get_basic_parser, get_loglevel, get_progname
+
+import synd
+
+import ui_cmd
+
+import util
 
 log = logging.getLogger(get_progname())
 messager = util.Messager(get_progname())
@@ -157,6 +161,11 @@ class Proc(object):
         for entry in self.generate_entries():
             common.show_entry(entry, verbose=self.args.verbose)
 
+    def show_files(self):
+        """Show entries."""
+        for entry in self.generate_entries():
+            common.show_files(entry, verbose=self.args.verbose)
+
     def show_tags(self):
         """Show tags for feeds or entries."""
         tag_count = defaultdict(int)
@@ -231,6 +240,7 @@ class Proc(object):
             ui='cmd_ui',
             show_feed='show_feed',
             show_entry='show_entry',
+            show_files='show_files',
             show_tags='show_tags',
             show_dates='show_dates',
             show_cal='show_cal',
@@ -238,6 +248,12 @@ class Proc(object):
         name = funcs[cmd]
         f = getattr(self, name)
         f()
+
+    @classmethod
+    def cmds(cls):
+        # [x.split('_')[0] for x in globals().keys() if x.endswith('_cmd')]
+        return ([x.split('_')[1] for x in dir(cls) if x.startswith('cmd_')] +
+                [x for x in dir(cls) if x.startswith('show_')])
 
 
 def get_config_paths():
@@ -282,7 +298,7 @@ def parse_args():
     """Parse arguments."""
     epilog = 'Long options can be abbreviated unambigously'
     parser = get_basic_parser(description=__doc__, epilog=epilog)
-    parser.add('-c', '--commands', nargs='+',
+    parser.add('-c', '--commands', nargs='+', choices=Proc.cmds(),
                help='commands')
     parser.add('-d', '--directory', nargs='+', type=Path,
                help='directories')

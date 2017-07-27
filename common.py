@@ -1,6 +1,7 @@
 """Common functionality."""
 
 import logging
+import shlex
 from pathlib import Path
 
 import jsonfile
@@ -214,6 +215,13 @@ def show_entry(entry, verbose=0):
             s = '{length}, {typ}, {href}'
             lst.append((s.format(**d), 'File URL'))
     show(header, lst)
+
+
+def show_files(entry, verbose=0):
+    """Show files."""
+    for enc in entry.encs():
+        if verbose or enc.path.exists():
+            print(shlex.quote(str(enc.path)))
 
 
 def show_enclosure(enc):
