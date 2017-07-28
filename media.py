@@ -34,7 +34,10 @@ def check_output(args, **kwargs):
 
 
 def download_yle(url, path, sublang=None, tmpdir=None):
-    """Download file from Yle Areena. Return True if succesful."""
+    """Download file from Yle Areena. Return True if succesful.
+
+    `sublang` can be fin, swe, smi, none or all.
+    """
     if tmpdir is None:
         with tempfile.TemporaryDirectory(suffix='.tmp', prefix='yledl-') as t:
             return download_yle(url, path, sublang=sublang, tmpdir=t)
