@@ -2,7 +2,6 @@
 
 import logging
 from enum import Enum, unique
-# from collection import namedtuple
 from functools import total_ordering
 
 log = logging.getLogger(__name__)
