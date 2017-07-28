@@ -6,10 +6,12 @@ import cmd
 import logging
 import shlex
 
+import common
+
 import pyutils.misc
 
-import common
 import synd
+
 import util
 
 log = logging.getLogger(__name__)
