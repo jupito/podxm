@@ -6,7 +6,6 @@
 
 import logging
 import shlex
-import sys
 from collections import defaultdict
 from itertools import chain
 from pathlib import Path
@@ -316,4 +315,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
