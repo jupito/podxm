@@ -92,8 +92,8 @@ class Proc(object):
 
     def cmd_add(self):
         """Add feeds from URLs."""
-        urls = chain(self.args.url or [],
-                     chain(valid_lines(x) for x in self.args.urllist or []))
+        file_urls = chain(valid_lines(x) for x in self.args.urllist or [])
+        urls = chain(self.args.url or [], file_urls)
         self.add_urls(urls)
 
     def cmd_refresh(self):
