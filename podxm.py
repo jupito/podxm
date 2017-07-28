@@ -99,17 +99,17 @@ class Proc(object):
     def cmd_refresh(self):
         """Refresh feeds. Using --force forces retrieval."""
         n_skipped = 0
-        n_new_entries = 0
+        n_new = 0
         for feed in self.generate_feeds():
             r = feed.refresh(gracetime=self.args.gracetime,
                              force=self.args.force)
             if r is None:
                 n_skipped += 1
             else:
-                n_new_entries += r
+                n_new += r
         s = 'Found {} new entries in {} feeds, skipped {} feeds'
-        messager.msg(s.format(n_new_entries,
-                              len(self.view.directory)-n_skipped, n_skipped))
+        messager.msg(s.format(n_new, len(self.view.directory) - n_skipped,
+                              n_skipped))
 
     def cmd_check(self, path=None):
         """Check feeds. Write list of orphaned files. Using --force forces
