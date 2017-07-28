@@ -43,7 +43,7 @@ def download_yle(url, path, sublang=None, tmpdir=None):
             return download_yle(url, path, sublang=sublang, tmpdir=t)
 
     if sublang is None:
-        sublang = 'all'
+        sublang = 'fin'
     path = Path(path)
     tmpdir = Path(tmpdir)
     stream = tmpdir / 'stream'  # TODO: New yle-dl breaks -o.
