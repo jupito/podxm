@@ -12,8 +12,9 @@ from pathlib import Path
 
 import common
 
+from pyutils.args import get_basic_parser
 from pyutils.files import tempfile_and_backup, valid_lines
-from pyutils.misc import fmt_size, get_basic_parser, get_loglevel, get_progname
+from pyutils.misc import fmt_size, get_loglevel, get_progname
 
 import synd
 
@@ -28,10 +29,12 @@ user_dirs = util.AppDirsPathlib(get_progname())
 
 class Proc(object):
     """Program process state information."""
+    session_path = user_dirs.user_cache_dir / 'session.json'
+    orphans_path = user_dirs.user_cache_dir / 'orphans.txt'
+
     def __init__(self, args):
         self.args = args
-        session_path = user_dirs.user_cache_dir / 'session.json'
-        self.session = common.TextDict(session_path)
+        self.session = common.TextDict(self.session_path)
         self.view = common.View(args)
         if args.view:
             self.view = self.view.parse(args.view)
@@ -113,7 +116,7 @@ class Proc(object):
         configuration rewrite.
         """
         if path is None:
-            path = user_dirs.user_cache_dir / 'orphans.txt'
+            path = self.orphans_path
         orphans = []
         for feed in self.generate_feeds():
             seq = common.check_feed(feed)
@@ -241,18 +244,17 @@ class Proc(object):
 
 def get_config_paths():
     """Return default configuration files."""
+    dirnames = [user_dirs.user_config_dir, '.']
     filename = '{}.cfg'.format(get_progname())
-    paths = [user_dirs.user_config_dir / filename, Path(filename)]
-    paths = (x for x in paths if x.exists())
-    return paths
+    paths = [Path(x) / filename for x in dirnames]
+    return [x for x in paths if x.exists()]
 
 
 def parse_config(parser):
     """Parse configuration files."""
     prefix = parser.fromfile_prefix_chars[0]
     args = ['{}{}'.format(prefix, x) for x in get_config_paths()]
-    namespace = parser.parse_args(args)
-    return namespace
+    return parser.parse_args(args)
 
 
 def write_pathlist(paths, path):
