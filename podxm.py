@@ -151,22 +151,22 @@ class Proc(object):
                 messager.msg(entry.feed, entry.title)
             entry.set_flag(self.args.new_flag)
 
-    def show_feed(self):
+    def cmd_show_feed(self):
         """Show feeds."""
         for feed in self.generate_feeds():
             common.show_feed(feed, verbose=self.args.verbose)
 
-    def show_entry(self):
+    def cmd_show_entry(self):
         """Show entries."""
         for entry in self.generate_entries():
             common.show_entry(entry, verbose=self.args.verbose)
 
-    def show_files(self):
+    def cmd_show_files(self):
         """Show entries."""
         for entry in self.generate_entries():
             common.show_files(entry, verbose=self.args.verbose)
 
-    def show_tags(self):
+    def cmd_show_tags(self):
         """Show tags for feeds or entries."""
         tag_count = defaultdict(int)
         if self.args.verbose:
@@ -182,7 +182,7 @@ class Proc(object):
         for tag, cnt in sorted(tag_count.items()):
             messager.msg('{cnt:7} {tag}'.format(cnt=cnt, tag=tag))
 
-    def show_dates(self):
+    def cmd_show_dates(self):
         """Show stats about publish date deltas, or deltas themselves
         (verbose).
         """
@@ -202,7 +202,7 @@ class Proc(object):
         if not self.args.verbose and names is not None:
             messager.msg(*names)
 
-    def show_cal(self):
+    def cmd_show_cal(self):
         """Show calendar view of entries."""
         months = {}
         days = {}
@@ -228,32 +228,16 @@ class Proc(object):
         ui = ui_cmd.UI(self)
         ui.run(jump=True)
 
-    def run_cmd(self, cmd):
-        """Run command."""
-        funcs = dict(
-            add='cmd_add',
-            refresh='cmd_refresh',
-            check='cmd_check',
-            setflag='cmd_setflag',
-            dl='cmd_dl',
-            norm='cmd_norm',
-            ui='cmd_ui',
-            show_feed='show_feed',
-            show_entry='show_entry',
-            show_files='show_files',
-            show_tags='show_tags',
-            show_dates='show_dates',
-            show_cal='show_cal',
-            )
-        name = funcs[cmd]
-        f = getattr(self, name)
-        f()
-
     @classmethod
     def cmds(cls):
-        # [x.split('_')[0] for x in globals().keys() if x.endswith('_cmd')]
-        return ([x.split('_')[1] for x in dir(cls) if x.startswith('cmd_')] +
-                [x for x in dir(cls) if x.startswith('show_')])
+        return {x.split('_', 1)[1]: x for x in dir(cls) if
+                x.startswith('cmd_')}
+
+    def run_cmd(self, cmd):
+        """Run command."""
+        name = self.cmds()[cmd]
+        f = getattr(self, name)
+        f()
 
 
 def get_config_paths():
@@ -298,7 +282,7 @@ def parse_args():
     """Parse arguments."""
     epilog = 'Long options can be abbreviated unambigously'
     parser = get_basic_parser(description=__doc__, epilog=epilog)
-    parser.add('-c', '--commands', nargs='+', choices=Proc.cmds(),
+    parser.add('-c', '--commands', nargs='+', choices=Proc.cmds().keys(),
                help='commands')
     parser.add('-d', '--directory', nargs='+', type=Path,
                help='directories')
