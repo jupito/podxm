@@ -248,16 +248,6 @@ def get_config_paths():
     return paths
 
 
-# def get_basic_parser(**kwargs):
-#     """Get an argument parser with standard arguments ready."""
-#     p = util.ArgParser(**kwargs)
-#     # p.add('-v', '--verbose', action='count', default=0,
-#     #       help='increase verbosity')
-#     p.add('--logfile', type=Path, help='log file')
-#     p.add('--loglevel', default='WARNING', help='log level name')
-#     return p
-
-
 def parse_config(parser):
     """Parse configuration files."""
     prefix = parser.fromfile_prefix_chars[0]
