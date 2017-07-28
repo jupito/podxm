@@ -33,12 +33,14 @@ def check_output(args, **kwargs):
         return None
 
 
-def download_yle(url, path, sublang='all', tmpdir=None):
+def download_yle(url, path, sublang=None, tmpdir=None):
     """Download file from Yle Areena. Return True if succesful."""
     if tmpdir is None:
         with tempfile.TemporaryDirectory(suffix='.tmp', prefix='yledl-') as t:
             return download_yle(url, path, sublang=sublang, tmpdir=t)
 
+    if sublang is None:
+        sublang = 'all'
     path = Path(path)
     tmpdir = Path(tmpdir)
     stream = tmpdir / 'stream'  # TODO: New yle-dl breaks -o.

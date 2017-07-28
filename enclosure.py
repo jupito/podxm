@@ -102,10 +102,14 @@ class YleEnclosure(Enclosure):
 
     def download(self):
         pyutils.files.ensure_dir(self.path)
-        return media.download_yle(self.href, self.path)
+        return media.download_yle(self.href, self.path, sublang=self.sublang())
 
     def stream(self):
         raise NotImplementedError()
+
+    def sublang(self):
+        """Return subtitle language."""
+        return self.entry.get_tags().get('sub')
 
 
 class YoutubeEnclosure(Enclosure):
