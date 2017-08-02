@@ -259,7 +259,7 @@ def timedelta_floatdays(timedelta):
 
 
 def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
-                 reverses: Sequence[bool]) -> None:
+                 reverses: Sequence[bool]) -> List:
     """A more general version of list.sort() that supports a number of key
     functions with independent reverse flags.
     """
@@ -277,3 +277,4 @@ def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
         """Construct sortkey for list.sort()."""
         return [m[k(entry)] for m, k in zip(maps, keys)]
     lst.sort(key=final_key)
+    return lst
