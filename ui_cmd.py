@@ -7,6 +7,7 @@ import logging
 import shlex
 
 import common
+from common import View
 
 import pyutils.misc
 
@@ -34,7 +35,7 @@ class UI(cmd.Cmd):
         self.lastcmd = 'n'
         self.lastline = self.lastcmd
         self.n_cmds = 0  # Number of commands given, if several.
-        self.view = common.View(**proc.view)
+        self.view = View(**proc.view)
         if view is not None:
             self.view.update(view)
         self.proc.cache_feeds = True
@@ -230,6 +231,9 @@ class UI(cmd.Cmd):
             common.show_feed(self.feed, verbose=2)
         if 'e' in targets:
             common.show_entry(self.entry, verbose=2)
+            if self.entry.flag == Flag.fresh:
+                messager.feedback('Flagging fresh entry as new.')
+                self.entry.set_flag(Flag.new)
         if 'm' in targets:
             common.show_enclosures(self.entry)
         if 'fl' in targets:
@@ -241,7 +245,7 @@ class UI(cmd.Cmd):
         """Download enclosures."""
         try:
             if self.entry.flag == Flag.deleted:
-                messager.feedback('Entry flagged as deleted, flagging as new')
+                messager.feedback('Flagging deleted entry as new.')
                 self.entry.set_flag(Flag.new)
                 self.feed.write()
             maxsize = int(arg or self.proc.args.maxsize)
@@ -280,11 +284,21 @@ class UI(cmd.Cmd):
             self.entry.set_flag(arg)
             self.feed.write()
 
+    def do_seen(self, arg):
+        """Set fresh as new."""
+        entries = self.entries if arg == 'all' else [self.entry]
+        for e in entries:
+            if e.flag == Flag.fresh:
+                s = 'Flagging deleted entry as new: {}'.format(e)
+                messager.feedback(s)
+                e.set_flag(Flag.new)
+                e.feed.write()
+
     def do_zoom(self, arg):
         """Zoom to feed."""
         viewstring = arg or ''
-        view = common.View(self.view, directory=[self.feed.directory],
-                           number=-1)
+        d = dict(self.view, directory=[self.feed.directory], number=-1)
+        view = View(**d)
         view = view.parse(viewstring)
         messager.msg('Zooming to feed "{}"'.format(self.feed.directory))
         ui = UI(self.proc, view=view)
