@@ -36,6 +36,7 @@ class Proc(object):
     def __init__(self, args):
         self.args = args
         self.session = common.TextDict(self.session_path)
+        # TODO: Use only --view.
         self.view = common.View(directory=args.directory, flags=args.flags,
                                 sortkey=args.sortkey, number=args.number,
                                 sortkey2=args.sortkey2)
@@ -192,6 +193,7 @@ class Proc(object):
         """Show stats about publish date deltas, or deltas themselves
         (verbose).
         """
+        # TODO: Use only --view.
         d = dict(flags=self.args.flags, sortkey=self.args.sortkey,
                  number=self.args.number)
         names = None
@@ -283,14 +285,6 @@ def parse_args():
                help='directories')
     parser.add('-r', '--recursive', action='store_true', default=True,
                help='recurse directories')
-    parser.add('-f', '--flags',
-               help='flag filter for entries')
-    parser.add('-s', '--sortkey',
-               help='entry sort key')
-    parser.add('-S', '--sortkey2',
-               help='entry sort key 2')
-    parser.add('-n', '--number', type=int,
-               help='maximum number of entries to process')
     parser.add('-w', '--view',
                help='view (f,s,n,S)')
     parser.add('-u', '--url', nargs='*',
@@ -305,6 +299,15 @@ def parse_args():
                help='maximum download size (MB)')
     parser.add('--force', action='store_true',
                help='force operation (depends on command)')
+    # TODO: The rest are obsolete.
+    parser.add('--flags',
+               help='flag filter for entries')
+    parser.add('--sortkey',
+               help='entry sort key')
+    parser.add('--sortkey2',
+               help='entry sort key 2')
+    parser.add('--number', type=int,
+               help='maximum number of entries to process')
     namespace = parse_config(parser)
     return parser.parse_args(namespace=namespace)
 
