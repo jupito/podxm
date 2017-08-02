@@ -1,12 +1,14 @@
 """Feed entry."""
 
 import logging
+import webbrowser
 from functools import lru_cache, total_ordering
 
-import media
-import util
 from enclosure import Enclosure, YleEnclosure, YoutubeEnclosure
+
 from misctypes import Flag, TagDict
+
+import util
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
@@ -16,7 +18,7 @@ messager = util.Messager(__name__)
 class Entry(object):
     """Feed entry."""
     def __init__(self, feed, guid, link, date_published, date_seen, author,
-                 title, subtitle, summary, enclosures, tags, flag='n'):
+                 title, subtitle, summary, enclosures, tags, flag=Flag.fresh):
         """Create new entry."""
         self.feed = feed  # Parent feed object.
         self.guid = guid
@@ -130,4 +132,4 @@ class Entry(object):
 
     def open_link(self):
         """Open entry link in web browser."""
-        media.open_link(self.link)
+        webbrowser.open(self.link)

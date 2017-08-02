@@ -6,11 +6,11 @@
 # TODO: Summary should not be in feeds?
 # TODO: Subtitle should not be in entries?
 # TODO: I've only seen one feed with multiple enclosures, and they were dupes.
-# TODO: Move FEEDFILE inside class Feed.
 
 import datetime
 import logging
 import re
+import webbrowser
 from contextlib import contextmanager
 from functools import lru_cache
 try:
@@ -20,13 +20,13 @@ except ImportError:
 from pathlib import Path
 
 import common
-import fpapi
-import media
-import util
 from entry import Entry
+
+import fpapi
 from misctypes import Flag, TagDict
 
-FEEDFILE = 'data.json'  # Feed information file.
+import util
+
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
 
@@ -61,6 +61,8 @@ class Head(object):
 
 
 class Feed(object):
+    FEEDFILE = 'data.json'  # Feed information file.
+
     """Feed with entries."""
     def __init__(self, url, old_url=None, directory=None, parseinfo=None,
                  head=None, entries=None):
@@ -293,7 +295,7 @@ class Feed(object):
 
     def open_link(self):
         """Open feed link in web browser."""
-        media.open_link(self.head.link)
+        webbrowser.open(self.head.link)
 
     @lru_cache()
     def get_tags(self):
@@ -314,10 +316,10 @@ class Feed(object):
         except (KeyError, ValueError):
             return 0
 
-    @staticmethod
-    def data_path(directory=''):
+    @classmethod
+    def data_path(cls, directory=''):
         """Return feed data file path (relative)."""
-        return Path(directory) / FEEDFILE
+        return Path(directory) / cls.FEEDFILE
 
     @staticmethod
     def read(directory):

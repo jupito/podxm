@@ -8,11 +8,13 @@ import jsonfile
 
 import media
 
+from misctypes import Flag
+
 import pyutils.files
 import pyutils.misc
 from pyutils.misc import fmt_size
 
-import synd
+from synd import Feed
 
 import util
 
@@ -81,33 +83,43 @@ def read_data(path):
 
 class View(util.AttrDict):
     """A view to a feedlist."""
-    def __init__(self, *args, **kwargs):
+    DEFAULTS = dict(flags='foin', sortkey='fpD', number=1, sortkey2='SD')
+
+    def __init__(self, directory=None, flags=None, sortkey=None, number=None,
+                 sortkey2=None):
         super().__init__()
-        d = dict(*args, **kwargs)
-        self.directory = d.get('directory')
+        self.directory = directory
         if self.directory is not None:
             self.directory = [Path(x) for x in self.directory]
-        # self.flags = d.get('flags') or 'oin'
-        self.flags = [synd.Flag(x) for x in (d.get('flags') or 'oin')]
-        self.sortkey = d.get('sortkey') or 'fpD'
-        self.number = d.get('number', 1)
-        self.sortkey2 = d.get('sortkey2') or 'SD'
+        if flags is None:
+            flags = self.DEFAULTS['flags']
+        if sortkey is None:
+            sortkey = self.DEFAULTS['sortkey']
+        if number is None:
+            number = self.DEFAULTS['number']
+        if sortkey2 is None:
+            sortkey2 = self.DEFAULTS['sortkey2']
+        self.flags = [Flag(x) for x in flags]
+        self.sortkey = sortkey
+        self.number = number
+        self.sortkey2 = sortkey2
 
     def __str__(self):
-        s = 'View(f={flags}, s={sortkey}, n={number}, S={sortkey2})'
-        d = dict(self)
-        d['flags'] = ''.join(x.value for x in self.flags)
+        s = '(f={flags}, s={sortkey}, n={number}, S={sortkey2}, {n})'
+        d = dict(self, flags=''.join(x.value for x in self.flags),
+                 n=len(self.directory))
         return s.format(**d)
 
     def parse(self, s, sep=','):
         """Parse view string, update original view, and create a new one."""
-        lst = list(s.split(sep)) + [None] * 4  # Assure minimum length.
+        # lst = list(s.split(sep)) + [None] * 4  # Assure minimum length.
+        flags, sortkey, number, sortkey2 = s.split(sep)
         return self.__class__(
             directory=self.directory,
-            flags=lst[0] or self.flags,
-            sortkey=lst[1] or self.sortkey,
-            number=int(lst[2] or self.number),
-            sortkey2=lst[3] or self.sortkey2,
+            flags=flags or self.flags,
+            sortkey=sortkey or self.sortkey,
+            number=int(number or self.number),
+            sortkey2=sortkey2 or self.sortkey2,
             )
 
 
@@ -132,7 +144,7 @@ def check_feed(feed):
 
 def add_url(url):
     """Add feed. Return directory name."""
-    feed = synd.Feed(url)
+    feed = Feed(url)
     feed.refresh(force=True)
     # check_feed(feed)
     if feed.directory.exists():
@@ -175,8 +187,8 @@ def show_feed(feed, verbose=0):
         first = util.time_fmt(feed.entries[0].date, fmt='isodate')
         last = util.time_fmt(feed.entries[-1].date, fmt='isodate')
         lst.extend([
-            (', '.join('{} {}'.format(x.name, n_flagged(x)) for x in
-                       synd.Flag), 'Flags'),
+            (', '.join('{} {}'.format(x.name, n_flagged(x)) for x in Flag),
+             'Flags'),
             ('earliest {}, latest {}'.format(first, last), 'Range'),
             ])
     show(header, lst)
@@ -229,7 +241,7 @@ def show_enclosure(enc):
         messager.msg('Media info:')
         messager.pp(media.get_media_info(enc.path))
         messager.msg('Extended attributes:')
-        messager.pp(sorted(pyutils.files.XAttr(enc.path).items()))
+        messager.pp(sorted(pyutils.files.XAttrStr(enc.path).items()))
     else:
         log.error('No file: %s', enc.path)
 
@@ -296,9 +308,9 @@ def play_enclosures(entry, set_flag=True):
     """Play entry enclosures."""
     exit_codes = (play_enclosure(x) for x in entry.encs())
     if set_flag and all(x == 0 for x in exit_codes):
-        if entry.flag in [synd.Flag.important, synd.Flag.new]:
+        if entry.flag in [Flag.fresh, Flag.important, Flag.new]:
             messager.msg('Flagging entry as opened')
-            entry.set_flag(synd.Flag.opened)
+            entry.set_flag(Flag.opened)
 
 
 def remove_enclosure(enc):

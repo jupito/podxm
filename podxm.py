@@ -11,12 +11,13 @@ from itertools import chain
 from pathlib import Path
 
 import common
+from misctypes import Flag
 
 from pyutils.args import get_basic_parser
 from pyutils.files import tempfile_and_backup, valid_lines
 from pyutils.misc import fmt_size, get_loglevel, get_progname
 
-import synd
+from synd import Feed
 
 import ui_cmd
 
@@ -35,7 +36,9 @@ class Proc(object):
     def __init__(self, args):
         self.args = args
         self.session = common.TextDict(self.session_path)
-        self.view = common.View(args)
+        self.view = common.View(directory=args.directory, flags=args.flags,
+                                sortkey=args.sortkey, number=args.number,
+                                sortkey2=args.sortkey2)
         if args.view:
             self.view = self.view.parse(args.view)
         self.views = {}  # Optional feed-specific views.
@@ -49,7 +52,7 @@ class Proc(object):
         """Search directory arguments recursively."""
         result = set()
         for path in paths:
-            result.update(x.parent for x in path.rglob(synd.FEEDFILE))
+            result.update(x.parent for x in path.rglob(Feed.FEEDFILE))
         # log.warning([len(paths), len(result)])
         return sorted(result)
 
@@ -60,10 +63,10 @@ class Proc(object):
         for directory in view.directory:
             if self.cache_feeds:
                 if directory not in self.open_feeds:
-                    self.open_feeds[directory] = synd.Feed.read(directory)
+                    self.open_feeds[directory] = Feed.read(directory)
                 yield self.open_feeds[directory]
             else:
-                with synd.Feed.open(directory) as feed:
+                with Feed.open(directory) as feed:
                     yield feed
 
     def generate_entries(self, view=None):
@@ -136,8 +139,9 @@ class Proc(object):
             for feed in self.generate_feeds():
                 s = feed.get_tags().get('dl')
                 if s:
-                    view = self.view.parse(',,{}'.format(s))
+                    view = self.view.parse(',,{},'.format(s))
                     self.views[feed.directory] = view
+                    # print(feed, self.views[feed.directory])
         for entry in self.generate_entries():
             common.download_enclosures(entry, self.args.maxsize)
 
@@ -293,7 +297,7 @@ def parse_args():
                help='URLs to add')
     parser.add('-U', '--urllist', nargs='*',
                help='list file of URLs to add')
-    parser.add('--new_flag', choices=[x.value for x in synd.Flag],
+    parser.add('--new_flag', choices=[x.value for x in Flag],
                help='new flag value for setflag command')
     parser.add('--gracetime', type=float, default=5,
                help='refresh grace time in hours')

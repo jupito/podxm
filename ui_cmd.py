@@ -11,6 +11,7 @@ import common
 import pyutils.misc
 
 import synd
+from synd import Flag
 
 import util
 
@@ -33,7 +34,7 @@ class UI(cmd.Cmd):
         self.lastcmd = 'n'
         self.lastline = self.lastcmd
         self.n_cmds = 0  # Number of commands given, if several.
-        self.view = common.View(proc.view)
+        self.view = common.View(**proc.view)
         if view is not None:
             self.view.update(view)
         self.proc.cache_feeds = True
@@ -239,9 +240,9 @@ class UI(cmd.Cmd):
     def do_download(self, arg):
         """Download enclosures."""
         try:
-            if self.entry.flag == synd.Flag.deleted:
+            if self.entry.flag == Flag.deleted:
                 messager.feedback('Entry flagged as deleted, flagging as new')
-                self.entry.set_flag(synd.Flag.new)
+                self.entry.set_flag(Flag.new)
                 self.feed.write()
             maxsize = int(arg or self.proc.args.maxsize)
             common.download_enclosures(self.entry, maxsize=maxsize)
@@ -334,34 +335,34 @@ class UI(cmd.Cmd):
 #     intro = 'Welcome'
 #     prompt = '>>> '
 #     separator = ';'  # Separator for multiple commands on one line.
-# 
+#
 #     def preloop(self):
 #         print('pre')
-# 
+#
 #     def postloop(self):
 #         print('post')
-# 
+#
 #     def precmd(self, line):
 #         print('precmd', line)
 #         lines = line.split(self.separator)
 #         first = lines.pop(0)
 #         self.cmdqueue.extend(lines)
 #         return first
-# 
+#
 #     def do_EOF(self, arg):
 #         """Quit."""
 #         return True
-# 
+#
 #     do_bye = do_EOF
-# 
+#
 #     def do_foo(self, arg):
 #         """jees"""
 #         print('foobar: -{}-'.format(arg))
-# 
+#
 #     def do_bar(self, arg):
 #         """jees nbar"""
 #         print('bar')
-# 
+#
 #     # def complete_foo(self, text, line, begidx, endidx):
 #     #     lst = list(globals().keys())
 #     #     return [x for x in lst if x.startswith(text)]

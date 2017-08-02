@@ -6,10 +6,9 @@ import logging
 import shlex
 import subprocess
 import tempfile
-import webbrowser
 from pathlib import Path
 
-from pyutils.files import XAttr, move
+from pyutils.files import XAttrStr, move
 from pyutils.misc import fmt_args
 
 log = logging.getLogger(__name__)
@@ -113,8 +112,9 @@ def get_gain(path):
     """Get ReplayGain level."""
     key = 'user.loudness.replaygain_track_gain'
     try:
-        attrs = XAttr(path)
-        value, unit = attrs[key].decode('ascii').split()
+        attrs = XAttrStr(path)
+        # value, unit = attrs[key].decode('ascii').split()
+        value, unit = attrs[key].split()
         value = float(value)
         return value, unit
     except (KeyError, FileNotFoundError):
@@ -150,6 +150,6 @@ def play_stream(url):
     return call(args)
 
 
-def open_link(url, **kwargs):
-    """Open entry link in web browser."""
-    webbrowser.open(url, **kwargs)
+# def open_link(url, **kwargs):
+#     """Open entry link in web browser."""
+#     webbrowser.open(url, **kwargs)
