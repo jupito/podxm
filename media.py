@@ -7,13 +7,12 @@ import shlex
 import subprocess
 import tempfile
 from pathlib import Path, PurePath
-from typing import Sequence, Tuple, TypeVar, Union
+from typing import Sequence, Tuple, Union
 
 from pyutils.files import XAttrStr, move
 from pyutils.misc import fmt_args
 
 log = logging.getLogger(__name__)
-P = TypeVar('P', PurePath, str, bytes)
 
 
 def call(args: Sequence[str]) -> int:
@@ -110,7 +109,7 @@ def normalize_volume(path):
     return call(args)
 
 
-def get_gain(path: P) -> Union[Tuple[float, str], None]:
+def get_gain(path: PurePath) -> Union[Tuple[float, str], None]:
     """Get ReplayGain level."""
     key = 'user.loudness.replaygain_track_gain'
     try:
@@ -128,7 +127,7 @@ def fmt_gain(gain: Tuple[float, str]) -> str:
     return ''.join(str(x) for x in gain) if gain else str(gain)
 
 
-def play_file(path: P) -> int:
+def play_file(path: PurePath) -> int:
     """Play media."""
     gain = get_gain(path)
     if gain:
