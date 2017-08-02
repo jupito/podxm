@@ -6,8 +6,8 @@ import logging
 import shlex
 import subprocess
 import tempfile
-from pathlib import Path, PurePath
-from typing import Sequence, Tuple, Union
+from pathlib import Path
+from typing import Iterable, Sequence, Tuple, Union
 
 from pyutils.files import XAttrStr, move
 from pyutils.misc import fmt_args
@@ -20,7 +20,7 @@ def call(args: Sequence[str]) -> int:
     return subprocess.call(args)
 
 
-def check_output(args, **kwargs):
+def check_output(args: Sequence[str], **kwargs) -> str:
     log.info('Running: %s', ' '.join(args))
     try:
         return subprocess.check_output(args, universal_newlines=True, **kwargs)
@@ -33,19 +33,20 @@ def check_output(args, **kwargs):
         return None
 
 
-def download_yle(url, path, sublang=None, tmpdir=None):
+def download_yle(url: str, path: Path, sublang: str = None,
+                 tmpdir: Path = None) -> bool:
     """Download file from Yle Areena. Return True if succesful.
 
     `sublang` can be fin, swe, smi, none or all.
     """
     if tmpdir is None:
         with tempfile.TemporaryDirectory(suffix='.tmp', prefix='yledl-') as t:
-            return download_yle(url, path, sublang=sublang, tmpdir=t)
+            return download_yle(url, path, sublang=sublang, tmpdir=Path(t))
 
     if sublang is None:
         sublang = 'fin'
-    path = Path(path)
-    tmpdir = Path(tmpdir)
+    # path = Path(path)
+    # tmpdir = Path(tmpdir)
     stream = tmpdir / 'stream'  # TODO: New yle-dl breaks -o.
     args = fmt_args('yle-dl --sublang {sublang} -o {o} {url}', sublang=sublang,
                     o=stream.name, url=url)
@@ -66,14 +67,14 @@ def download_yle(url, path, sublang=None, tmpdir=None):
     return True
 
 
-def iter_subfiles(path):
+def iter_subfiles(path: Path) -> Iterable[Path]:
     """Glob any subtitle files downloaded with mediafile."""
     pattern = '{}.*.srt'.format(path.name)
     subs = path.parent.glob(pattern)
     return subs
 
 
-def get_media_info(path):
+def get_media_info(path: Path) -> dict:
     """Return information about media file as a dictionary."""
     s = '''ffprobe
         -hide_banner -loglevel fatal
@@ -91,7 +92,7 @@ def get_media_info(path):
     return info
 
 
-def get_duration(path):
+def get_duration(path: Path) -> Union[datetime.timedelta, None]:
     """Return media duration in seconds."""
     d = get_media_info(path)
     try:
@@ -101,7 +102,7 @@ def get_duration(path):
     return datetime.timedelta(seconds=seconds)
 
 
-def normalize_volume(path):
+def normalize_volume(path: Path) -> int:
     """Normalize volume."""
     # args = fmt_args('volnorm -s {path}', path=path)
     cmd = 'volnorm -s {path}'.format(path=shlex.quote(str(path)))
@@ -109,7 +110,7 @@ def normalize_volume(path):
     return call(args)
 
 
-def get_gain(path: PurePath) -> Union[Tuple[float, str], None]:
+def get_gain(path: Path) -> Union[Tuple[float, str], None]:
     """Get ReplayGain level."""
     key = 'user.loudness.replaygain_track_gain'
     try:
@@ -127,7 +128,7 @@ def fmt_gain(gain: Tuple[float, str]) -> str:
     return ''.join(str(x) for x in gain) if gain else str(gain)
 
 
-def play_file(path: PurePath) -> int:
+def play_file(path: Path) -> int:
     """Play media."""
     gain = get_gain(path)
     if gain:
