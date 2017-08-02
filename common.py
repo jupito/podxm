@@ -112,8 +112,14 @@ class View(util.AttrDict):
 
     def parse(self, s, sep=','):
         """Parse view string, update original view, and create a new one."""
+        if not s:
+            s = ',,,'
         # lst = list(s.split(sep)) + [None] * 4  # Assure minimum length.
-        flags, sortkey, number, sortkey2 = s.split(sep)
+        try:
+            flags, sortkey, number, sortkey2 = s.split(sep)
+        except ValueError as e:
+            log.error('Cannot parse view: "%s"', s)
+            raise
         return self.__class__(
             directory=self.directory,
             flags=flags or self.flags,
