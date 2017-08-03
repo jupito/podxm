@@ -289,7 +289,7 @@ class UI(cmd.Cmd):
         entries = self.entries if arg == 'all' else [self.entry]
         for e in entries:
             if e.flag == Flag.fresh:
-                s = 'Flagging deleted entry as new: {}'.format(e)
+                s = 'Flagging {0.flag} entry as new: {}'.format(e)
                 messager.feedback(s)
                 e.set_flag(Flag.new)
                 e.feed.write()
