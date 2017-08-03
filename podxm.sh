@@ -1,11 +1,12 @@
 #!/bin/ksh
 
 prg="podxm"
+
 param=$1
-test $param || param=ui
+test $param || param=default
 
 case "$param" in
-ui)
+ui|default)
     cmd="$prg -c ui -w ,D,1,SD -d !(music*)"
     ;;
 ui-music)
@@ -22,7 +23,7 @@ dl)
     # $prg -c dl -w foina,D,3, -d !(music*)
     # $prg -c norm -w foina,,-1, -d !(music*)
     dir="!(music*)"
-    view="foina,D,3,"
+    view="oina,D,3,"
     cmd1="$prg -c dl -w $view -d $dir"
     cmd2="$prg -c norm -w $view -d $dir"
     cmd="$cmd1 && $cmd2"
@@ -45,6 +46,8 @@ src)
     ;;
 *)
     print "Unknown parameter: $1"
+    exit 1
+    ;;
 esac
 
 cd $HOME/podcasts
