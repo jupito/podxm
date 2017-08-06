@@ -352,6 +352,7 @@ class Feed(object):
 SORTKEYS = {
     'f': lambda entry: entry.flag.index(),
     'p': lambda entry: entry.feed.priority,
+    'n': lambda entry: entry.feed._nentries,
     's': lambda entry: entry.score,
     'd': lambda entry: entry.date,
     't': lambda entry: entry.title.lower(),
