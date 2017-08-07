@@ -139,8 +139,8 @@ class UI(cmd.Cmd):
     def get_prompt(self):
         """Get command prompt string. Long entry titles are shortened."""
         s = '{{x}} [{default}] '.format(default=self.lastline)
-        return s.format(x=pyutils.misc.truncate(self.get_row(),
-                                                reserved=len(s)))
+        x = pyutils.misc.truncate(self.get_row(), reserved=len(s))
+        return s.format(x=x)
 
     @property
     def prompt(self):
@@ -289,7 +289,7 @@ class UI(cmd.Cmd):
         if not arg:
             messager.feedback('Argument needed.')
         else:
-            self.entry.progress = int_or_float(arg)
+            self.entry.progress = pyutils.misc.int_or_float(arg)
             self.feed.write()
 
     def do_seen(self, arg):
@@ -297,7 +297,7 @@ class UI(cmd.Cmd):
         entries = self.entries if arg == 'all' else [self.entry]
         for e in entries:
             if e.flag == Flag.fresh:
-                s = 'Flagging {0.flag} entry as new: {}'.format(e)
+                s = 'Flagging {0.flag} entry as new: {0}'.format(e)
                 messager.feedback(s)
                 e.set_flag(Flag.new)
                 e.feed.write()
@@ -350,13 +350,6 @@ class UI(cmd.Cmd):
     do_u = do_update
     do_v = do_view
     do_z = do_zoom
-
-
-def int_or_float(x):
-    x = float(x)
-    if x.is_integer():
-        return int(x)
-    return x
 
 
 # Testing.
