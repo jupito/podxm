@@ -114,9 +114,11 @@ class View(util.AttrDict):
         """Parse view string, update original view, and create a new one."""
         if not s:
             s = ',,,'
-        # lst = list(s.split(sep)) + [None] * 4  # Assure minimum length.
+        lst = list(s.split(sep))
+        if len(lst) < 4:
+            lst += [''] * (4 - len(lst))  # Fill in missing parts.
         try:
-            flags, sortkey, number, sortkey2 = s.split(sep)
+            flags, sortkey, number, sortkey2 = lst
         except ValueError as e:
             log.error('Cannot parse view: "%s"', s)
             raise
@@ -211,7 +213,7 @@ def show_entry(entry, verbose=0):
             (util.time_fmt(entry.date_published, fmt='isofull'), "Publ'd"),
             (util.time_fmt(entry.date_seen, fmt='isofull'), 'Seen'),
             (entry.score, 'Score'),
-            (entry.flag.name, 'Flag'),
+            ([entry.flag.name, entry.progress], 'Flag'),
             (entry.guid, 'GUID'),
             (entry.link, 'Link'),
             (entry.title, 'Title'),
@@ -331,4 +333,6 @@ def remove_enclosures(entry, set_flag=True):
     for enc in entry.encs():
         remove_enclosure(enc)
     if set_flag:
+        if entry.flag == Flag.opened:
+            entry.progress = 1
         entry.set_flag('d')

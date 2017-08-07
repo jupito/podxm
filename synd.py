@@ -350,17 +350,18 @@ class Feed(object):
 # TODO: Or a view.
 
 SORTKEYS = {
-    'f': lambda entry: entry.flag.index(),
-    'p': lambda entry: entry.feed.priority,
-    'n': lambda entry: entry.feed._nentries,
-    's': lambda entry: entry.score,
+    '=': lambda _: 0,  # Indicates no per-feed alterations allowed.
     'd': lambda entry: entry.date,
-    't': lambda entry: entry.title.lower(),
+    'f': lambda entry: entry.flag.index(),
     'i': lambda entry: str(entry.feed.directory).lower(),
+    'l': lambda entry: (entry.feed.head.language or 'zzz').lower(),
+    'n': lambda entry: entry.feed._nentries,
+    'p': lambda entry: entry.feed.priority,
+    'r': lambda entry: entry.progress,
+    's': lambda entry: entry.score,
+    't': lambda entry: entry.title.lower(),
     'u': lambda entry: entry.duration(),
     'z': lambda entry: entry.size(),
-    'l': lambda entry: (entry.feed.head.language or 'zzz').lower(),
-    '=': lambda _: 0,  # Indicates no per-feed alterations allowed.
     }
 
 

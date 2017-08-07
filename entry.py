@@ -18,7 +18,8 @@ messager = util.Messager(__name__)
 class Entry(object):
     """Feed entry."""
     def __init__(self, feed, guid, link, date_published, date_seen, author,
-                 title, subtitle, summary, enclosures, tags, flag=Flag.fresh):
+                 title, subtitle, summary, enclosures, tags, flag=Flag.fresh,
+                 progress=0):
         """Create new entry."""
         self.feed = feed  # Parent feed object.
         self.guid = guid
@@ -32,7 +33,7 @@ class Entry(object):
         self.enclosures = enclosures
         self.tags = tags
         self.flag = Flag(flag)
-        # self.progress = progress  # TODO
+        self.progress = int(progress)
 
     def __str__(self):
         return self.title or self.link or self.guid
