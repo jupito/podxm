@@ -86,7 +86,8 @@ class Enclosure(object):
     def remove(self):
         """Remove from disk."""
         if self.path.exists():
-            self.path.unlink()
+            # self.path.unlink()
+            pyutils.files.trash_or_rm(self.path)
         for path in self.path.parent.glob('{}.*.srt'.format(self.path.stem)):
             logging.warning('Removing subtitle: %s', path)
 

@@ -297,7 +297,7 @@ class UI(cmd.Cmd):
         entries = self.entries if arg == 'all' else [self.entry]
         for e in entries:
             if e.flag == Flag.fresh:
-                s = 'Flagging {0.flag} entry as new: {0}'.format(e)
+                s = 'Flagging {0.flag.name} entry as new: {0}'.format(e)
                 messager.feedback(s)
                 e.set_flag(Flag.new)
                 e.feed.write()

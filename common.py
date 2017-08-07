@@ -324,7 +324,8 @@ def remove_enclosure(enc):
     """Remove enclosure from disk."""
     if enc.path.exists():
         messager.msg('Removing:', enc.path)
-        enc.path.unlink()
+        # enc.path.unlink()
+        pyutils.files.trash_or_rm(enc.path)
 
 
 def remove_enclosures(entry, set_flag=True):
