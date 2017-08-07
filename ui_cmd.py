@@ -284,6 +284,14 @@ class UI(cmd.Cmd):
             self.entry.set_flag(arg)
             self.feed.write()
 
+    def do_setprogress(self, arg):
+        """Set entry flag."""
+        if not arg:
+            messager.feedback('Argument needed.')
+        else:
+            self.entry.progress = int_or_float(arg)
+            self.feed.write()
+
     def do_seen(self, arg):
         """Set fresh as new."""
         entries = self.entries if arg == 'all' else [self.entry]
@@ -327,21 +335,28 @@ class UI(cmd.Cmd):
             messager.msg(n)
             # TODO
 
-    do_quit = do_EOF
-    do_q = do_quit
-    do_n = do_next
+    do_N = do_nextfeed
     do_b = do_back
+    do_dl = do_download
     do_g = do_go
     do_l = do_list
-    do_N = do_nextfeed
-    do_s = do_search
-    do_v = do_view
-    do_dl = do_download
+    do_n = do_next
     do_nl = do_normalize
     do_p = do_play
+    do_q = do_quit = do_EOF
     do_rm = do_remove
-    do_z = do_zoom
+    do_s = do_search
+    do_setp = do_setprogress
     do_u = do_update
+    do_v = do_view
+    do_z = do_zoom
+
+
+def int_or_float(x):
+    x = float(x)
+    if x.is_integer():
+        return int(x)
+    return x
 
 
 # Testing.
