@@ -209,7 +209,6 @@ def show_entry(entry, verbose=0):
     lst = []
     if verbose:
         lst.extend([
-            # (util.time_fmt(entry.date_published, fmt='rfc2822'), 'Date'),
             (util.time_fmt(entry.date_published, fmt='isofull'), "Publ'd"),
             (util.time_fmt(entry.date_seen, fmt='isofull'), 'Seen'),
             (entry.score, 'Score'),
