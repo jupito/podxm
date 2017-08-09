@@ -20,15 +20,15 @@ do_param() {
         ;;
     dl)
         podxm -c dl -w in,D,3,SD -d !(music*)
-        podxm -c norm -w in,D,3,SD -d !(music*)
+        nice podxm -c norm -w in,D,3,SD -d !(music*)
         ;;
     dl-m)
         podxm -c dl -w in,d,5,Sd -d music*
-        podxm -c norm -w in,d,5,Sd -d music*
+        nice podxm -c norm -w in,d,5,Sd -d music*
         ;;
     dl-ia)
         podxm -c dl -w ia,,-1,SD --force -d *
-        podxm -c norm -w foina,,-1,SD -d *
+        nice podxm -c norm -w foina,,-1,SD -d *
         ;;
     src)
         $VISUAL $0
@@ -42,12 +42,10 @@ do_param() {
 }
 
 set -e
-#typeset -t do_param
 
 cd $HOME/podcasts
 
 for param; do
-    echo
-    echo $param
+    echo "#### $param"
     do_param $param
 done
