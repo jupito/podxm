@@ -234,6 +234,7 @@ class UI(cmd.Cmd):
             if self.entry.flag == Flag.fresh:
                 messager.feedback('Flagging fresh entry as new.')
                 self.entry.set_flag(Flag.new)
+                self.feed.write()
         if 'm' in targets:
             common.show_enclosures(self.entry)
         if 'fl' in targets:
