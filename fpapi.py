@@ -7,7 +7,6 @@ import logging
 
 import feedparser
 
-
 log = logging.getLogger(__name__)
 
 
