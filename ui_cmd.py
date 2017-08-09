@@ -1,6 +1,6 @@
 """Line-oriented UI."""
 
-# https://docs.python.org/3.6/library/cmd.html
+# https://docs.python.org/3/library/cmd.html
 
 import cmd
 import logging
@@ -351,41 +351,3 @@ class UI(cmd.Cmd):
     do_u = do_update
     do_v = do_view
     do_z = do_zoom
-
-
-# Testing.
-# class CmdUI(cmd.Cmd):
-#     intro = 'Welcome'
-#     prompt = '>>> '
-#     separator = ';'  # Separator for multiple commands on one line.
-#
-#     def preloop(self):
-#         print('pre')
-#
-#     def postloop(self):
-#         print('post')
-#
-#     def precmd(self, line):
-#         print('precmd', line)
-#         lines = line.split(self.separator)
-#         first = lines.pop(0)
-#         self.cmdqueue.extend(lines)
-#         return first
-#
-#     def do_EOF(self, arg):
-#         """Quit."""
-#         return True
-#
-#     do_bye = do_EOF
-#
-#     def do_foo(self, arg):
-#         """jees"""
-#         print('foobar: -{}-'.format(arg))
-#
-#     def do_bar(self, arg):
-#         """jees nbar"""
-#         print('bar')
-#
-#     # def complete_foo(self, text, line, begidx, endidx):
-#     #     lst = list(globals().keys())
-#     #     return [x for x in lst if x.startswith(text)]
