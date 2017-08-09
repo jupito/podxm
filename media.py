@@ -115,8 +115,7 @@ def get_gain(path: Path) -> Union[Tuple[float, str], None]:
         attrs = XAttrStr(path)
         value, unit = attrs[key].split()
         value = float(value)
-    # except (FileNotFoundError, KeyError):
-    except KeyError:
+    except (FileNotFoundError, KeyError):
         return None
     except ValueError:
         log.warning('Invalid ReplayGain value "%s" in "%s"', value, path)
