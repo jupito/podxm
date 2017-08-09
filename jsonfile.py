@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 def write_json(fp, obj):
     """Write JSON file."""
-    json.dump(obj, fp, cls=MyJSONEncoder, ensure_ascii=False, indent=4,
+    json.dump(obj, fp, cls=MyJSONEncoder, ensure_ascii=False, indent=2,
               sort_keys=True)
 
 
