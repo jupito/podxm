@@ -30,10 +30,10 @@ class MyJSONEncoder(json.JSONEncoder):
         """Return a serializable object for custom objects."""
         if isinstance(o, set):
             return list(o)
-        # if hasattr(o, '_asdict'):
-        #     d = o._asdict()
-        #     d['__type__'] = type(o).__name__
-        #     return d
+        if hasattr(o, '_asdict'):
+            d = o._asdict()
+            # d['__type__'] = type(o).__name__
+            return d
         if hasattr(o, 'as_json'):
             return o.as_json()
         # if isinstance(o, datetime.datetime):
