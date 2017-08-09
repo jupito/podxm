@@ -70,8 +70,7 @@ def download_yle(url: str, path: Path, sublang: str = None,
 def iter_subfiles(path: Path) -> Iterable[Path]:
     """Glob any subtitle files downloaded with mediafile."""
     pattern = '{}.*.srt'.format(path.name)
-    subs = path.parent.glob(pattern)
-    return subs
+    return path.parent.glob(pattern)
 
 
 def get_media_info(path: Path) -> dict:
@@ -88,8 +87,7 @@ def get_media_info(path: Path) -> dict:
     output = check_output(args)
     if output is None:
         return None
-    info = json.loads(output)
-    return info
+    return json.loads(output)
 
 
 def get_duration(path: Path) -> Union[datetime.timedelta, None]:
@@ -115,12 +113,15 @@ def get_gain(path: Path) -> Union[Tuple[float, str], None]:
     key = 'user.loudness.replaygain_track_gain'
     try:
         attrs = XAttrStr(path)
-        # value, unit = attrs[key].decode('ascii').split()
         value, unit = attrs[key].split()
         value = float(value)
-        return value, unit
-    except (KeyError, FileNotFoundError):
+    # except (FileNotFoundError, KeyError):
+    except KeyError:
         return None
+    except ValueError:
+        log.warning('Invalid ReplayGain value "%s" in "%s"', value, path)
+        return None
+    return value, unit
 
 
 def fmt_gain(gain: Tuple[float, str]) -> str:
