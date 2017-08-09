@@ -1,0 +1,9 @@
+(B) +rename Flag to Status? @entry
+(B) 2017-08-09 +rename as_json() to _asdict()? But ParsedDatetime.as_json() returns str
+(B) Entry.check(): check for duplicate enclosures
+(B) I've only seen one feed with multiple enclosures, and they were dupes @entry
+(B) Feed.update(): don't mark as modified if not really updated
+(B) subtitle should not be in entry? @entry
+(B) summary should not be in feeds? @synd
+x 2017-08-09 Add flag for skipped entries? @entry Handled with progress=0.
+x 2017-08-09 Add flag for unseen entries? @synd

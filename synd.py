@@ -1,12 +1,5 @@
 """Syndicated feed with entries, based on feedparser library."""
 
-# TODO: Add flag for unseen entries?
-# TODO: Add flag for skipped entries?
-# TODO: Rename Flag to Status?
-# TODO: Summary should not be in feeds?
-# TODO: Subtitle should not be in entries?
-# TODO: I've only seen one feed with multiple enclosures, and they were dupes.
-
 import datetime
 import logging
 import re
@@ -156,7 +149,6 @@ class Feed(object):
         """Update contents from a feedparser object. Return the number of
         updated entries.
         """
-        # TODO: Don't mark as modified if not really updated.
         log.debug('Updating feed: %s', self)
         self.parseinfo = fpapi.get_parseinfo(fp)
         self.head = Head(**(fpapi.get_head(fp.feed)))

@@ -84,7 +84,6 @@ class Entry(object):
 
     def check(self):
         """Entry sanity check."""
-        # TODO: Check for duplicate enclosures.
         if self.date > self.feed.head.date_seen:
             s = ('{e}: Entry claims to be newer than feed: {e.date}' +
                  ' > {e.feed.head.date_seen}')
