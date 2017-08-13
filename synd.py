@@ -344,6 +344,7 @@ class Feed(object):
 SORTKEYS = {
     '=': lambda _: 0,  # Indicates no per-feed alterations allowed.
     'd': lambda entry: entry.date,
+    'e': lambda entry: len(entry.enclosures),
     'f': lambda entry: entry.flag.index(),
     'i': lambda entry: str(entry.feed.directory).lower(),
     'l': lambda entry: (entry.feed.head.language or 'zzz').lower(),
@@ -368,7 +369,9 @@ def search_entries(entries, patterns, flags=re.IGNORECASE, start=0):
     """Return index to first entry from start matching all RegExp patterns."""
     def get_strings(entry):
         """Return strings to match against."""
-        return [str(entry.feed.directory), entry.feed.head.title, entry.title]
+        return [str(entry.feed.directory), entry.feed.head.title,
+                entry.feed.head.subtitle, entry.feed.head.summary, entry.title,
+                entry.subtitle, entry.summary]
 
     def pattern_found(strings, pattern, flags):
         """Try matching."""
