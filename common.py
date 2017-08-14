@@ -105,7 +105,7 @@ class View(util.AttrDict):
         self.sortkey2 = sortkey2
 
     def __str__(self):
-        s = '(f={flags}, s={sortkey}, n={number}, S={sortkey2}, {n})'
+        s = '(f={flags}, n={number}, s={sortkey}, S={sortkey2}, {n})'
         d = dict(self, flags=''.join(x.value for x in self.flags),
                  n=len(self.directory))
         return s.format(**d)
