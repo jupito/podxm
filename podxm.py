@@ -140,7 +140,7 @@ class Proc(object):
             for feed in self.generate_feeds():
                 s = feed.get_tags().get('dl')
                 if s:
-                    view = self.view.parse(',,{},'.format(s))
+                    view = self.view.parse(',{},,'.format(s))
                     self.views[feed.directory] = view
                     # print(feed, self.views[feed.directory])
         for entry in self.generate_entries():
@@ -286,7 +286,7 @@ def parse_args():
     parser.add('-r', '--recursive', action='store_true', default=True,
                help='recurse directories')
     parser.add('-w', '--view',
-               help='view (f,s,n,S)')
+               help='view (f,n,s,S)')
     parser.add('-u', '--url', nargs='*',
                help='URLs to add')
     parser.add('-U', '--urllist', nargs='*',
