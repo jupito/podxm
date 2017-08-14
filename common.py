@@ -122,6 +122,8 @@ class View(util.AttrDict):
         except ValueError as e:
             log.error('Cannot parse view: "%s"', s)
             raise
+        if sortkey == '-1' or sortkey.isdigit():
+            sortkey, number = number, sortkey
         return self.__class__(
             directory=self.directory,
             flags=flags or self.flags,
