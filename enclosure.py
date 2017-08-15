@@ -27,7 +27,7 @@ class Enclosure(object):
     @property
     @lru_cache()
     def suffix(self):
-        """URL filename suffix."""
+        """URL filename suffix (in lowercase)."""
         suffix = pyutils.misc.url_suffix(self.href)
         if not suffix:
             if self.typ:
@@ -35,7 +35,7 @@ class Enclosure(object):
                 suffix = '.' + parts[-1]
             else:
                 suffix = '.unknown'
-        return suffix
+        return suffix.lower()
 
     @property
     @lru_cache()
@@ -77,7 +77,11 @@ class Enclosure(object):
 
     def play(self):
         """Play downloaded file."""
-        return media.play_file(self.path)
+        if self.entry.progress is not None and 0 < self.entry.progress < 1:
+            start = float(self.entry.progress)
+        else:
+            start = None
+        return media.play_file(self.path, start=start)
 
     def stream(self):
         """Stream from net."""
