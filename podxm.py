@@ -149,7 +149,7 @@ class Proc(object):
     def cmd_norm(self):
         """Normalize enclosure loudness. Using --force re-normalizes."""
         for entry in self.generate_entries():
-            common.normalize_enclosures(entry, self.args.force)
+            common.normalize_enclosures(entry, force=False)
 
     def cmd_setflag(self):
         """Set flag for entries to --new_flag value."""
