@@ -101,7 +101,7 @@ class UI(cmd.Cmd):
 
     @property
     def i(self):
-        return self._i
+        return pyutils.misc.clamp(self._i, 0, len(self.entries) - 1)
 
     @i.setter
     def i(self, value):
@@ -290,7 +290,7 @@ class UI(cmd.Cmd):
         if not arg:
             messager.feedback('Argument needed.')
         else:
-            self.entry.progress = pyutils.misc.int_or_float(arg)
+            self.entry.progress = arg
             self.feed.write()
 
     def do_seen(self, arg):
