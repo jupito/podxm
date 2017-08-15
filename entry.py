@@ -9,6 +9,7 @@ from enclosure import Enclosure, YleEnclosure, YoutubeEnclosure
 from misctypes import Flag, TagDict
 
 import util
+from pyutils.misc import int_or_float
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
@@ -33,7 +34,7 @@ class Entry(object):
         self.enclosures = enclosures
         self.tags = tags
         self.flag = Flag(flag)
-        self.progress = int(progress)
+        self.progress = progress
 
     def __str__(self):
         return self.title or self.link or self.guid
@@ -44,6 +45,7 @@ class Entry(object):
     def as_json(self):
         d = dict(self.__dict__)
         del d['feed']
+        d['progress'] = d.pop('_progress')
         return d
 
     @property
@@ -81,6 +83,15 @@ class Entry(object):
         if self.flag != flag:
             self.flag = flag
             self.feed.modified = True
+
+    @property
+    def progress(self):
+        return self._progress
+
+    @progress.setter
+    def progress(self, value):
+        self._progress = int_or_float(value)
+        self.feed.modified = True
 
     def check(self):
         """Entry sanity check."""
