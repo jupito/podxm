@@ -1,3 +1,4 @@
+(A) normalize filenames with html character codes
 (B) +rename Flag to Status? @entry
 (B) 2017-08-09 +rename as_json() to _asdict()? But ParsedDatetime.as_json() returns str
 (B) Entry.check(): check for duplicate enclosures
