@@ -47,7 +47,7 @@ def download_yle(url: str, path: Path, sublang: str = None,
         sublang = 'fin'
     # path = Path(path)
     # tmpdir = Path(tmpdir)
-    stream = tmpdir / 'stream'  # TODO: New yle-dl breaks -o.
+    stream = tmpdir / 'stream.flv'  # TODO: New yle-dl breaks -o.
     args = fmt_args('yle-dl --sublang {sublang} -o {o} {url}', sublang=sublang,
                     o=stream.name, url=url)
     logging.debug(args)
@@ -128,7 +128,7 @@ def fmt_gain(gain: Tuple[float, str]) -> str:
     return ''.join(str(x) for x in gain) if gain else str(gain)
 
 
-def play_file(path: Path) -> int:
+def play_file(path: Path, start=None) -> int:
     """Play media."""
     gain = get_gain(path)
     if gain:
@@ -138,8 +138,12 @@ def play_file(path: Path) -> int:
     af = '--af=volume=replaygain-track:{}'.format(s)
     # args = fmt_args('mpv {af} {path}', af=af, path=path)
     ad = '--audio-display=no'
-    cmd = 'mpv {af} {ad} {path}'.format(af=af, ad=ad,
-                                        path=shlex.quote(str(path)))
+    if start is not None:
+        st = '--start={}%'.format(start * 100)
+    else:
+        st = ''
+    cmd = 'mpv {af} {ad} {st} {path}'.format(af=af, ad=ad, st=st,
+                                             path=shlex.quote(str(path)))
     args = shlex.split(cmd)
     return call(args)
 
