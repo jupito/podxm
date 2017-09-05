@@ -55,6 +55,7 @@ class Head(object):
 
 class Feed(object):
     FEEDFILE = 'data.json'  # Feed information file.
+    BAKEXT = '.bak'
 
     """Feed with entries."""
     def __init__(self, url, old_url=None, directory=None, parseinfo=None,
@@ -278,10 +279,9 @@ class Feed(object):
 
     def get_orphans(self):
         """Return list of orphaned files in feed directory."""
-        BAKEXT = '.bak'
         dirfiles = {x.name for x in self.directory.iterdir()}
         p = Feed.data_path()
-        datafiles = {str(p), str(p.with_suffix(p.suffix + BAKEXT))}
+        datafiles = {str(p), str(p.with_suffix(p.suffix + self.BAKEXT))}
         encfiles = {enc.filename for entry in self.entries
                     for enc in entry.encs()}
         orphans = dirfiles.difference(datafiles).difference(encfiles)
