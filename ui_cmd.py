@@ -175,7 +175,7 @@ class UI(cmd.Cmd):
             return True
         return stop
 
-    def do_EOF(self, arg):
+    def do_EOF(self, arg):  # noqa: N802 (function name should be lowercase)
         """Quit."""
         return True
 
