@@ -3,7 +3,7 @@
 from functools import lru_cache
 import logging
 
-import pyutils.misc
+import pyutils.net
 import pyutils.files
 
 import media
@@ -28,7 +28,7 @@ class Enclosure(object):
     @lru_cache()
     def suffix(self):
         """URL filename suffix (in lowercase)."""
-        suffix = pyutils.misc.url_suffix(self.href)
+        suffix = pyutils.net.url_suffix(self.href)
         if not suffix:
             if self.typ:
                 parts = self.typ.split('/')
@@ -73,7 +73,7 @@ class Enclosure(object):
         """Download file."""
         # log.info('Downloading: %s', self.path)
         pyutils.files.ensure_dir(self.path)
-        return pyutils.misc.download(self.href, self.path, progress=True)
+        return pyutils.net.download(self.href, self.path, progress=True)
 
     def play(self):
         """Play downloaded file."""
