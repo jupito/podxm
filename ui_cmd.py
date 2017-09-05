@@ -275,12 +275,12 @@ class UI(cmd.Cmd):
 
     def do_normalize(self, arg):
         """Normalize volume."""
-        force = bool(int(arg or 0))
+        force = str_as_bool(arg, False)
         common.normalize_enclosures(self.entry, force=force)
 
     def do_play(self, arg):
         """Play enclosures, flag as open if successful."""
-        set_flag = bool(int(arg or 1))
+        set_flag = str_as_bool(arg, True)
         common.show_entry(self.entry, verbose=2)
         common.download_enclosures(self.entry)
         common.normalize_enclosures(self.entry)
@@ -290,7 +290,7 @@ class UI(cmd.Cmd):
     def do_remove(self, arg):
         """Remove enclosures."""
         try:
-            set_flag = bool(int(arg or 1))
+            set_flag = str_as_bool(arg, True)
             common.remove_enclosures(self.entry, set_flag=set_flag)
             self.entry.feed.write()
         except ValueError as e:
@@ -370,3 +370,8 @@ class UI(cmd.Cmd):
     do_u = do_update
     do_v = do_view
     do_z = do_zoom
+
+
+def str_as_bool(value: str, default: bool) -> bool:
+    """Interpret a string as boolean."""
+    return bool(int(value or default))
