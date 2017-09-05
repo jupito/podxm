@@ -67,3 +67,25 @@ def generate_guid(fp):
                                hash(fp.get('title')))
     log.warning('Cooked up this for missing entry GUID: %s', guid)
     return guid
+
+
+# media.py
+from functools import lru_cache
+class MediaSource(object):
+    def __init__(self, path):
+        self.path = path
+
+    @property
+    @lru_cache()
+    def info(self):
+        return get_media_info(self.path)
+
+    @property
+    @lru_cache()
+    def duration(self):
+        return get_duration(self.path)
+
+    @property
+    @lru_cache()
+    def gain(self):
+        return get_gain(self.path)
