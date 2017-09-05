@@ -105,6 +105,8 @@ class UI(cmd.Cmd):
 
     @i.setter
     def i(self, value):
+        if value < 0:
+            value = len(self.entries) + value
         self._i = pyutils.misc.clamp(value, 0, len(self.entries) - 1)
 
     @property
@@ -210,10 +212,7 @@ class UI(cmd.Cmd):
 
     def do_go(self, arg):
         """Go to indexed item."""
-        if arg == 'G':
-            self.i = len(self.entries) - 1
-        else:
-            self.i = int(arg or 0)
+        self.i = int(arg or 0)
 
     def do_list(self, arg):
         # lines = ('{e.feed}: {e}'.format(e=x) for x in self.entries)
