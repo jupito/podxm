@@ -136,6 +136,25 @@ class UI(cmd.Cmd):
         s = '{flag}{dl}{nl} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
         return s.format(**d)
 
+    def get_row_with_duplicate_entries(self, i=None):
+        """A (slow) version of get_row() with number of duplicate entries in
+        other feeds.
+        """
+        # TODO: Rather implement duplicate finder on demand in common.py.
+        if i is None:
+            i = self.i
+        entry = self.entries[i]
+        # nhits = sum(x.guid == entry.guid for x in self.entries)
+        # nhits = sum(x.link == entry.link for x in self.entries)
+        # nhits = sum(x.subtitle == entry.subtitle for x in self.entries)
+
+        def _urls(entry):
+            return {x.href for x in entry.encs()}
+        ext_entries = (x for x in self.entries if x.feed.directory !=
+                       entry.feed.directory)
+        nhits = sum(_urls(x) == _urls(entry) for x in ext_entries)
+        return '{} {}'.format(nhits, self.get_row(i=i))
+
     def get_prompt(self):
         """Get command prompt string. Long entry titles are shortened."""
         s = '{{x}} [{default}] '.format(default=self.lastline)
