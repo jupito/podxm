@@ -107,6 +107,8 @@ class Entry(object):
         #     for enc in self.encs():
         #         if not enc.path.exists():
         #             yield '{e}: Missing file: {p}'.format(e=self, p=enc.path)
+        if self.flag == Flag.deleted and 'archived' in self.get_tags():
+            yield '{e}: Deleted entry in archived feed.'
         for enc in self.encs():
             if not enc.suffix:
                 yield '{e}: No file suffix'.format(e=self)
