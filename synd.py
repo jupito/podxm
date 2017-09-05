@@ -185,7 +185,7 @@ class Feed(object):
             # log.warning('Updating entry with newer: %s: %s: %s', self, entry,
             #             old.flag)
             s = 'Updating entry with newer: {}: {}: {}'
-            messager.msg(s.format(self, entry, old.flag))
+            messager.msg(s.format(self, entry, old.flag.name))
             entry.flag = old.flag
             self.entries.remove(old)
             self.entries.append(entry)
@@ -196,7 +196,7 @@ class Feed(object):
             # log.warning('Updating entry with new enclosures: %s: %s: %s',
             #             self, entry, old.flag)
             s = 'Updating entry with new enclosures: {}: {}: {}'
-            messager.msg(s.format(self, entry, old.flag))
+            messager.msg(s.format(self, entry, old.flag.name))
             self.entries.remove(old)
             self.entries.append(entry)
             return True
