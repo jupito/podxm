@@ -210,6 +210,8 @@ class Feed(object):
                 sortkey = sortkey.replace('D', 'd')  # Ascending date.
             elif dateorder == 'desc':
                 sortkey = sortkey.replace('d', 'D')  # Descending date.
+            elif dateorder:
+                log.error('Invalid date order: %s', self)
         return sortkey
 
     def list_entries(self, flags=None, sortkey=None, number=None):
