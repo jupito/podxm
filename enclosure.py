@@ -1,12 +1,11 @@
 """Enclosure classes."""
 
-from functools import lru_cache
 import logging
-
-import pyutils.net
-import pyutils.files
+from functools import lru_cache
 
 import media
+import pyutils.files
+import pyutils.net
 import util
 
 log = logging.getLogger(__name__)
