@@ -356,6 +356,7 @@ SORTKEYS = {
     's': lambda entry: entry.score,
     't': lambda entry: entry.title.lower(),
     'u': lambda entry: entry.duration(),
+    'x': lambda entry: entry.skipped(),
     'z': lambda entry: entry.size(),
     }
 
