@@ -85,6 +85,16 @@ class Entry(object):
             self.feed.modified = True
 
     @property
+    def status(self):
+        # TODO: Replace 'flag' with 'status'; use properties.
+        return self.flag
+
+    @status.setter
+    def status(self, value):
+        # TODO: Replace 'flag' with 'status'; use properties.
+        self.set_flag(value)
+
+    @property
     def progress(self):
         return self._progress
 
@@ -92,6 +102,10 @@ class Entry(object):
     def progress(self, value):
         self._progress = int_or_float(value)
         self.feed.modified = True
+
+    def skipped(self):
+        """Was entry skipped without listening?"""
+        return self.status == Flag.deleted and self.progress == 0
 
     def check(self):
         """Entry sanity check."""
