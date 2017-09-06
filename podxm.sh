@@ -23,6 +23,12 @@ _du() {
     echo "$nfiles files, "$size""
 }
 
+_sync_playlists() {
+    playlistdir=Music/playlists
+    mkdir -p ~/jolla/$playlistdir
+    cp -a ~/$playlistdir/* ~/jolla/$playlistdir
+}
+
 _sync() {
     # Sync files with Jolla.
     tmp="$(_tmpfile)"
@@ -82,8 +88,7 @@ do_param() {
         _nice podxm -c norm -w foina,-1,,SD -d *
         ;;
     sync)
-        rm -rf ~/jolla/Music/playlists
-        cp -a ~/Music/playlists ~/jolla/Music
+        _sync_playlists
         _sync 0current
         _sync complete
         _sync history
