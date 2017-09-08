@@ -1,3 +1,4 @@
+(A) 2017-09-09 feed progress (average of entries?)
 (A) Feed.refresh() is too complex (mccabe)
 (A) normalize filenames with html character codes
 (B) +rename Flag to Status? @entry
