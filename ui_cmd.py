@@ -32,6 +32,7 @@ class UI(cmd.Cmd):
         self.proc = proc
         self.entries = None
         self._i = 0
+        self._prev_i = None
         self.lastcmd = 'n'
         self.lastline = self.lastcmd
         self.n_cmds = 0  # Number of commands given, if several.
@@ -107,6 +108,7 @@ class UI(cmd.Cmd):
     def i(self, value):
         if value < 0:
             value = len(self.entries) + value
+        self._prev_i = self._i
         self._i = pyutils.misc.clamp(value, 0, len(self.entries) - 1)
 
     @property
@@ -124,18 +126,52 @@ class UI(cmd.Cmd):
         if i is None:
             i = self.i
         entry = self.entries[i]
+
+        def encs_char(entry):
+            """Return a single-character enclosure status string."""
+            encs = list(entry.encs())
+            nencs = len(encs)
+            ndownloaded = sum(x.path.exists() for x in encs)
+            nnormalized = sum(x.is_normalized() for x in encs)
+            if not encs:
+                return '-'
+            if nencs > 9:
+                return '+'
+            if ndownloaded == 0:
+                return str(nencs)
+            if nencs != ndownloaded:
+                return chr(ord('a') + ndownloaded)
+            else:
+                return chr(ord('A') + nnormalized)
+
+        def index_mark(i):
+            # return '*' if i == len(self.entries) - 1 else ''
+            if len(self.entries) == 0:
+                return '-'
+            if i == 0:
+                return '•'
+            if i == len(self.entries) - 1:
+                return '◘'
+            marks = '▁▂▃▄▅▆▇█'
+            return marks[int(i / len(self.entries) * len(marks))]
+
         d = dict(
             i=i,
-            n=len(self.entries),
+            iwidth=len(str(len(self.entries) - 1)),
+            # n=len(self.entries),
+            im=index_mark(i),
             nfe=entry.feed._nentries or -1,
             flag=entry.flag.value,
             dir=entry.feed.directory,
             d=util.time_fmt(entry.date, fmt='compactdate'),
-            dl=sum(x.path.exists() for x in entry.encs()),
-            nl=sum(x.is_normalized() for x in entry.encs()),
+            # dl=sum(x.path.exists() for x in encs),
+            # nl=sum(x.is_normalized() for x in encs),
+            ec=encs_char(entry),
             t=entry.abbreviated_title,
             )
-        s = '{flag}{dl}{nl} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
+        # s = '{flag}{dl}{nl} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
+        # s = '{flag}{ec} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
+        s = '{im}{i:{iwidth}} {flag}{ec} {nfe:2d} {d} {dir}◆{t}'
         return s.format(**d)
 
     def get_row_with_duplicate_entries(self, i=None):
@@ -162,6 +198,10 @@ class UI(cmd.Cmd):
         s = '{{x}} [{default}] '.format(default=self.lastline)
         x = pyutils.misc.truncate(self.get_row(), reserved=len(s))
         return s.format(x=x)
+
+    @property
+    def intro(self):
+        return 'Welcome: {}'.format(len(self.entries))
 
     @property
     def prompt(self):
@@ -212,7 +252,16 @@ class UI(cmd.Cmd):
 
     def do_go(self, arg):
         """Go to indexed item."""
-        self.i = int(arg or 0)
+        if arg == '-':
+            if self._prev_i is None:
+                messager.feedback('No previous location set.')
+            else:
+                self.i = self._prev_i
+        else:
+            try:
+                self.i = int(arg or 0)
+            except ValueError:
+                messager.feedback('Invalid location: {}'.format(arg))
 
     def do_list(self, arg):
         # lines = ('{e.feed}: {e}'.format(e=x) for x in self.entries)
@@ -260,6 +309,18 @@ class UI(cmd.Cmd):
         if 'el' in targets:
             self.entry.open_link()
 
+    def do_check(self, arg):
+        """Validate feed or entry."""
+        targets = arg or 'e'
+        if 'f' in targets:
+            # n = common.check_feed(self.feed)
+            # messager.feedback('Orphaned files: {}'.format(n))
+            for msg in self.feed.check():
+                messager.feedback(msg)
+        if 'e' in targets:
+            for msg in self.entry.check():
+                messager.feedback(msg)
+
     def do_download(self, arg):
         """Download enclosures."""
         try:
@@ -274,11 +335,13 @@ class UI(cmd.Cmd):
 
     def do_normalize(self, arg):
         """Normalize volume."""
+        # force = bool(int(arg or 0))
         force = str_as_bool(arg, False)
         common.normalize_enclosures(self.entry, force=force)
 
     def do_play(self, arg):
         """Play enclosures, flag as open if successful."""
+        # set_flag = bool(int(arg or 1))
         set_flag = str_as_bool(arg, True)
         common.show_entry(self.entry, verbose=2)
         common.download_enclosures(self.entry)
@@ -289,6 +352,7 @@ class UI(cmd.Cmd):
     def do_remove(self, arg):
         """Remove enclosures."""
         try:
+            # set_flag = bool(int(arg or 1))
             set_flag = str_as_bool(arg, True)
             common.remove_enclosures(self.entry, set_flag=set_flag)
             self.entry.feed.write()
