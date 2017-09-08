@@ -1,15 +1,33 @@
 #!/bin/sh
 
-# Run podxm. Ksh is used because sh/dash doesn't support "!(music()".
+# Run podxm.
 
 set -e
 
-prg="$(basename $0)"
 cd $HOME/podcasts
-dirs_nomusic="$(find -mindepth 1 -maxdepth 1 -type d \! -ipath './music*')"
-dirs_music="$(find -mindepth 1 -maxdepth 1 -type d -ipath './music*')"
+
+#dirs_talk="$(find -mindepth 1 -maxdepth 1 -type d \! -ipath './music*')"
+#dirs_music="$(find -mindepth 1 -maxdepth 1 -type d -ipath './music*')"
+
+_dirs_talk() {
+    find -mindepth 1 -maxdepth 1 -type d \! -ipath './music*'
+}
+
+_dirs_music() {
+    find -mindepth 1 -maxdepth 1 -type d -ipath './music*'
+}
+
+_dirs_current() {
+    echo 0current*
+}
+
+_dirs_iot() {
+    # dirs="$(find -mindepth 2 -maxdepth 2 -type d -iname 'in our time*' -printf '%P'\ )"
+    echo */in_our_time*
+}
 
 _tmpfile() {
+    prg="$(basename $0)"
     mktemp -u --tmpdir tmp.$prg.XXXXXXXXXX
 }
 
@@ -23,19 +41,27 @@ _du() {
     echo "$nfiles files, "$size""
 }
 
+_refresh() {
+    # Refresh all feeds in parallel.
+    #parallel-moreutils -j10 -n10 podxm -c refresh -d -- */*
+    #find -mindepth 2 -type d -print0 | xargs -0 -L10 -P10 podxm -c refresh -d
+    find -mindepth 2 -type d -print0 | xargs -0 -L25 -P4 podxm -c refresh -d
+}
+
 _sync_playlists() {
     playlistdir=Music/playlists
     mkdir -p ~/jolla/$playlistdir
     cp -a ~/$playlistdir/* ~/jolla/$playlistdir
 }
 
-_sync() {
+_sync_podcasts() {
     # Sync files with Jolla.
     tmp="$(_tmpfile)"
     n=15
     prefix="$1"
     dst="$HOME/jolla/Music/podcasts/$prefix"
 
+    # Previously, Ksh is used because sh/dash doesn't support "!(music()".
     #dirs="$(echo $HOME/podcasts/!(complete*|done*|music*|video*))"
     #dirs="$(echo $HOME/podcasts/!(complete*|done*|video*))"
     dirs="$(echo $HOME/podcasts/$prefix*)"
@@ -43,9 +69,9 @@ _sync() {
 
     $cmd | grep '\.\(mp3\|ogg\)' | head -n $n > "$tmp"
 
-    # nfiles="$(wc -l < $tmp)"
-    # size="$(xargs du -chs < $tmp | tail -n 1)"
-    # echo "$prefix: $nfiles files, "$size""
+    #nfiles="$(wc -l < $tmp)"
+    #size="$(xargs du -chs < $tmp | tail -n 1)"
+    #echo "$prefix: $nfiles files, "$size""
 
     #less "$tmp"
     mkdir -p "$dst"
@@ -57,29 +83,29 @@ _sync() {
 
 do_param() {
     case "$1" in
-    ui)
-        podxm -c ui -w ,1,D,SD -d $dirs_nomusic
+    ref|refresh)
+        _refresh
+        ;;
+    ui-t)
+        podxm -c ui -w ,1,D,SD -d $(_dirs_talk)
         ;;
     ui-m)
-        podxm -c ui -w ,1,Sd,Sd -d $dirs_music
+        podxm -c ui -w ,1,Sd,Sd -d $(_dirs_music)
         ;;
     ui-f)
         podxm -c ui -w f,-1,D,SD -d *
         ;;
+    ui-c)
+        podxm -c ui -w ,1,D,SD -d $(_dirs_current)
+        ;;
     ui-iot)
-        podxm -c ui -w foin,-1,d,d -d 'misc,dl=0/In Our Time'*
-        # dirs="$(find -mindepth 2 -maxdepth 2 -type d -iname 'in our time*' -printf '%P'\ )"
-        # podxm -c ui -w foin,-1,d,d -d $dirs
+        podxm -c ui -w foin,-1,d,d -d $(_dirs_iot)
         ;;
-    ref)
-        # parallel-moreutils -j10 -n10 podxm -c refresh -d -- */*
-        find -mindepth 2 -type d -print0 | xargs -0 -L10 -P10 podxm -c refresh -d
-        ;;
-    dl)
-        _nice podxm -c dl norm -w n,3,D,SD -d $dirs_nomusic
+    dl-t)
+        _nice podxm -c dl norm -w n,3,D,SD -d $(_dirs_talk)
         ;;
     dl-m)
-        _nice podxm -c dl norm -w n,3,d,Sd -d $dirs_music
+        _nice podxm -c dl norm -w n,3,d,Sd -d $(_dirs_music)
         ;;
     dl-i)
         _nice podxm -c dl norm -w oia,-1,,SD --force -d *
@@ -89,12 +115,15 @@ do_param() {
         ;;
     sync)
         _sync_playlists
-        _sync 0current
-        _sync complete
-        _sync history
-        _sync misc
-        _sync music
+        _sync_podcasts 0current
+        _sync_podcasts complete
+        _sync_podcasts history
+        _sync_podcasts misc
+        _sync_podcasts music
         _du ~/jolla/Music/podcasts
+        ;;
+    help)
+        grep '^\s\+[-|a-z]\+)' "$0"
         ;;
     src)
         $VISUAL "$0"
