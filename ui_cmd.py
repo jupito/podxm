@@ -168,10 +168,13 @@ class UI(cmd.Cmd):
             # nl=sum(x.is_normalized() for x in encs),
             ec=encs_char(entry),
             t=entry.abbreviated_title,
+            # ep=entry.progress,
+            # fp=entry.feed.progress,
             )
         # s = '{flag}{dl}{nl} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
         # s = '{flag}{ec} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
         s = '{im}{i:{iwidth}} {flag}{ec} {nfe:2d} {d} {dir}◆{t}'
+        # s = '{im}{i:{iwidth}} {flag}{ec} {nfe:2d} {d} [{fp:1.2f} {ep:1.2f}] {dir}◆{t}'
         return s.format(**d)
 
     def get_row_with_duplicate_entries(self, i=None):
