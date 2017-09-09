@@ -109,26 +109,24 @@ class Entry(object):
 
     def check(self):
         """Entry sanity check."""
+        encs = list(self.encs())
+        d = dict(e=self, n=len(encs))
         if self.date > self.feed.head.date_seen:
-            s = ('{e}: Entry claims to be newer than feed: {e.date}' +
-                 ' > {e.feed.head.date_seen}')
-            yield s.format(e=self)
-        n = len(self.enclosures)
-        if n > 1:
-            s = '{e}: Multiple enclosures: {n}'
-            yield s.format(e=self, n=n)
-        # if self.flag in [Flag.important, Flag.archived]:
-        #     for enc in self.encs():
-        #         if not enc.path.exists():
-        #             yield '{e}: Missing file: {p}'.format(e=self, p=enc.path)
+            yield ('{e}: Entry claims to be newer than feed: {e.date}' +
+                   ' > {e.feed.head.date_seen}').format(**d)
+        if d['n'] > 1:
+            yield '{e}: Multiple enclosures: {n}'.format(**d)
         if self.flag == Flag.deleted and 'archived' in self.get_tags():
-            yield '{e}: Deleted entry in archived feed.'
-        for enc in self.encs():
+            yield '{e}: Deleted entry in archived feed.'.format(**d)
+        for i, enc in enumerate(encs):
+            d.update(i=i, p=enc.path, u=enc.href)
             if not enc.suffix:
-                yield '{e}: No file suffix'.format(e=self)
+                yield '{e} #{i}: No file suffix: {p}'.format(**d)
+            if any(x.href == enc.href for x in encs[:i]):
+                yield '{e} #{i}: Duplicate link: {u}'.format(**d)
             if self.flag in [Flag.important, Flag.archived]:
                 if not enc.path.exists():
-                    yield '{e}: Missing file: {p}'.format(e=self, p=enc.path)
+                    yield '{e} #{i}: Missing file: {p}'.format(**d)
 
     def encs(self):
         """Generate (enclosure, dst_path, exists) tuples for entry."""
