@@ -11,6 +11,7 @@ try:
 except ImportError:
     from httpstatus import HTTPStatus  # HTTPStatus backported to 3.4.
 from pathlib import Path
+from statistics import mean
 
 import common
 from entry import Entry
@@ -315,6 +316,13 @@ class Feed(object):
         """Return feed data file path (relative)."""
         return Path(directory) / cls.FEEDFILE
 
+    @property
+    @lru_cache()
+    def progress(self):
+        if not self.entries:
+            return 0
+        return mean(x.progress for x in self.entries)
+
     @staticmethod
     def read(directory):
         """Read data."""
@@ -351,6 +359,7 @@ SORTKEYS = {
     'i': lambda entry: str(entry.feed.directory).lower(),
     'l': lambda entry: (entry.feed.head.language or 'zzz').lower(),
     'n': lambda entry: entry.feed._nentries,
+    'o': lambda entry: entry.feed.progress,
     'p': lambda entry: entry.feed.priority,
     'r': lambda entry: entry.progress,
     's': lambda entry: entry.score,
