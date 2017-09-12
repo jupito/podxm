@@ -182,9 +182,9 @@ def show_feed(feed, verbose=0):
             (feed.priority, 'Priority'),
             (feed.head.link, 'Link'),
             (feed.head.title, 'Title'),
-            (feed.head.subtitle, 'Subtitle'),
-            (feed.head.summary, 'Summary'),
-            (feed.head.language or 'unknown', 'Language'),
+            (feed.head.subtitle, 'Subt'),
+            (feed.head.summary, 'Summ'),
+            # (feed.head.language or 'unknown', 'Language'),
             # (', '.join(feed.get_tags().as_strings()) or [], 'Tags'),
             (str(feed.get_tags()), 'Tags'),
             (feed.head.image or [], 'Image'),
@@ -213,13 +213,13 @@ def show_entry(entry, verbose=0):
         lst.extend([
             (util.time_fmt(entry.date_published, fmt='isofull'), "Publ'd"),
             (util.time_fmt(entry.date_seen, fmt='isofull'), 'Seen'),
-            (entry.score, 'Score'),
-            ([entry.flag.name, entry.progress], 'Flag'),
+            # (entry.score, 'Score'),
+            ((entry.flag.name, entry.progress, entry.score), 'FlPrSc'),
             (entry.guid, 'GUID'),
             (entry.link, 'Link'),
             (entry.title, 'Title'),
-            (entry.subtitle, 'Subtitle'),
-            (entry.summary, 'Summary'),
+            (entry.subtitle, 'Subt'),
+            (entry.summary, 'Summ'),
             (str(entry.get_tags()), 'Tags'),
             ])
         for enc in entry.encs():
@@ -228,13 +228,13 @@ def show_entry(entry, verbose=0):
             try:
                 d['size'] = fmt_size(enc.size())
                 d['duration'] = util.fmt_duration(enc.duration())
-                d['gain'] = media.fmt_gain(media.get_gain(enc.path))
+                d['gain'] = media.get_gain(enc.path)
             except FileNotFoundError:
                 d['size'] = d['duration'] = d['gain'] = '-'
+            s = '{length}, {typ}, {href}'
+            lst.append((s.format(**d), 'URL'))
             s = '{size}, {duration}, {gain}, {name}'
             lst.append((s.format(**d), 'File'))
-            s = '{length}, {typ}, {href}'
-            lst.append((s.format(**d), 'File URL'))
     show(header, lst)
 
 
