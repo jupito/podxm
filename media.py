@@ -7,8 +7,9 @@ import shlex
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Iterable, Sequence, Tuple, Union
+from typing import Iterable, Sequence, Union
 
+from misctypes import Gain
 from pyutils.files import XAttrStr, move
 from pyutils.misc import fmt_args
 
@@ -108,31 +109,25 @@ def normalize_volume(path: Path) -> int:
     return call(args)
 
 
-def get_gain(path: Path) -> Union[Tuple[float, str], None]:
+def get_gain(path: Path) -> Union[Gain, None]:
     """Get ReplayGain level."""
     key = 'user.loudness.replaygain_track_gain'
     try:
         attrs = XAttrStr(path)
-        value, unit = attrs[key].split()
-        value = float(value)
+        gain = Gain.parse(attrs[key])
     except (FileNotFoundError, KeyError):
         return None
-    except ValueError:
-        log.warning('Invalid ReplayGain value "%s" in "%s"', value, path)
+    except ValueError as e:
+        log.exception('Invalid ReplayGain value: %s', path)
         return None
-    return value, unit
-
-
-def fmt_gain(gain: Tuple[float, str]) -> str:
-    """Format gain info. See get_gain()."""
-    return ''.join(str(x) for x in gain) if gain else str(gain)
+    return gain
 
 
 def play_file(path: Path, start=None) -> int:
     """Play media."""
     gain = get_gain(path)
     if gain:
-        s = 'replaygain-fallback={}'.format(gain[0])
+        s = 'replaygain-fallback={}'.format(gain.value)
     else:
         s = 'detach'
     af = '--af=volume=replaygain-track:{}'.format(s)
@@ -154,8 +149,3 @@ def play_stream(url: str) -> int:
     ad = '--audio-display=no'
     args = fmt_args('mpv {af} {ad} {url}', af=af, ad=ad, url=url)
     return call(args)
-
-
-# def open_link(url, **kwargs):
-#     """Open entry link in web browser."""
-#     webbrowser.open(url, **kwargs)
