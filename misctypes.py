@@ -4,6 +4,9 @@ import logging
 from enum import Enum, unique
 from functools import total_ordering
 
+import attr
+from attr.validators import in_, instance_of
+
 log = logging.getLogger(__name__)
 
 
@@ -75,3 +78,17 @@ class TagDict(dict):
     def is_sane(k):
         """Is tag well-behaving?"""
         return len(k) and all(x.isalnum() or x in '_&/-:' for x in k)
+
+
+@attr.s(frozen=True)
+class Gain(object):
+    """ReplayGain level."""
+    value = attr.ib(validator=instance_of(float), convert=float)
+    unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
+
+    def __str__(self):
+        return '{0.value} {0.unit}'.format(self)
+
+    @classmethod
+    def parse(cls, s):
+        return cls(*s.split())
