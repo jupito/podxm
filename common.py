@@ -83,9 +83,9 @@ def read_data(path):
 
 class View(util.AttrDict):
     """A view to a feedlist."""
-    DEFAULTS = dict(flags='foin', sortkey='fpD', number=1, sortkey2='SD')
+    DEFAULTS = dict(flags='foin', number=1, sortkey='fpD', sortkey2='SD')
 
-    def __init__(self, directory=None, flags=None, sortkey=None, number=None,
+    def __init__(self, directory=None, flags=None, number=None, sortkey=None,
                  sortkey2=None):
         super().__init__()
         self.directory = directory
@@ -93,15 +93,15 @@ class View(util.AttrDict):
             self.directory = [Path(x) for x in self.directory]
         if flags is None:
             flags = self.DEFAULTS['flags']
-        if sortkey is None:
-            sortkey = self.DEFAULTS['sortkey']
         if number is None:
             number = self.DEFAULTS['number']
+        if sortkey is None:
+            sortkey = self.DEFAULTS['sortkey']
         if sortkey2 is None:
             sortkey2 = self.DEFAULTS['sortkey2']
         self.flags = [Flag(x) for x in flags]
-        self.sortkey = sortkey
         self.number = number
+        self.sortkey = sortkey
         self.sortkey2 = sortkey2
 
     def __str__(self):
@@ -118,17 +118,15 @@ class View(util.AttrDict):
         if len(lst) < 4:
             lst += [''] * (4 - len(lst))  # Fill in missing parts.
         try:
-            flags, sortkey, number, sortkey2 = lst
+            flags, number, sortkey, sortkey2 = lst
         except ValueError as e:
             log.error('Cannot parse view: "%s"', s)
             raise
-        if sortkey == '-1' or sortkey.isdigit():
-            sortkey, number = number, sortkey
         return self.__class__(
             directory=self.directory,
             flags=flags or self.flags,
-            sortkey=sortkey or self.sortkey,
             number=int(number or self.number),
+            sortkey=sortkey or self.sortkey,
             sortkey2=sortkey2 or self.sortkey2,
             )
 
@@ -145,9 +143,9 @@ class View(util.AttrDict):
 #     messager.msg(value, *args, *kwargs)
 
 
-def check_feed(feed):
+def check_feed(feed, verbose=False):
     """Check feed. Return list of orphaned files."""
-    for msg in feed.check():
+    for msg in feed.check(verbose=verbose):
         messager.msg('{}: {}'.format(feed, msg))
     return feed.get_orphans()
 
@@ -167,7 +165,7 @@ def add_url(url):
 def show(header, seq, wrapper=WRAPPER):
     """Show bodies of text prettily, using a TextWrapper object."""
     if header:
-        messager.msg(*header, sep='\t')
+        messager.msg(*header, sep=' ▶ ')
     for text, title in seq:
         messager.msg(wrapper.fills(text, title+':'))
 
