@@ -38,7 +38,7 @@ class Proc(object):
         self.session = common.TextDict(self.session_path)
         # TODO: Use only --view.
         self.view = common.View(directory=args.directory, flags=args.flags,
-                                sortkey=args.sortkey, number=args.number,
+                                number=args.number, sortkey=args.sortkey,
                                 sortkey2=args.sortkey2)
         if args.view:
             self.view = self.view.parse(args.view)
@@ -74,10 +74,10 @@ class Proc(object):
         """Generate entries."""
         # if view is None:
         #     view = self.view
-        # d = dict(flags=view.flags, sortkey=view.sortkey, number=view.number)
+        # d = dict(flags=view.flags, number=view.number, sortkey=view.sortkey)
         for feed in self.generate_feeds(view=view):
             v = view or self.views.get(feed.directory) or self.view
-            d = dict(flags=v.flags, sortkey=v.sortkey, number=v.number)
+            d = dict(flags=v.flags, number=v.number, sortkey=v.sortkey)
             log.debug('Using view: %s: %s', feed, d)
             for entry in feed.list_entries(**d):
                 yield entry
@@ -123,7 +123,7 @@ class Proc(object):
             path = self.orphans_path
         orphans = []
         for feed in self.generate_feeds():
-            seq = common.check_feed(feed)
+            seq = common.check_feed(feed, verbose=self.args.verbose)
             seq = (feed.directory / x for x in seq)
             orphans.extend(seq)
             if self.args.force:
@@ -194,8 +194,8 @@ class Proc(object):
         (verbose).
         """
         # TODO: Use only --view.
-        d = dict(flags=self.args.flags, sortkey=self.args.sortkey,
-                 number=self.args.number)
+        d = dict(flags=self.args.flags, number=self.args.number,
+                 sortkey=self.args.sortkey)
         names = None
         for feed in self.generate_feeds():
             try:
@@ -299,15 +299,16 @@ def parse_args():
                help='maximum download size (MB)')
     parser.add('--force', action='store_true',
                help='force operation (depends on command)')
+
     # TODO: The rest are obsolete.
     parser.add('--flags',
                help='flag filter for entries')
+    parser.add('--number', type=int,
+               help='maximum number of entries to process')
     parser.add('--sortkey',
                help='entry sort key')
     parser.add('--sortkey2',
                help='entry sort key 2')
-    parser.add('--number', type=int,
-               help='maximum number of entries to process')
     namespace = parse_config(parser)
     return parser.parse_args(namespace=namespace)
 
