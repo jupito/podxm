@@ -4,17 +4,21 @@
 
 set -e
 
-cd $HOME/podcasts
+cd "$HOME/podcasts"
 
-#dirs_talk="$(find -mindepth 1 -maxdepth 1 -type d \! -ipath './music*')"
-#dirs_music="$(find -mindepth 1 -maxdepth 1 -type d -ipath './music*')"
+#dirs_talk="$(find . -mindepth 1 -maxdepth 1 -type d \! -ipath './music*')"
+#dirs_music="$(find . -mindepth 1 -maxdepth 1 -type d -ipath './music*')"
 
 _dirs_talk() {
-    find -mindepth 1 -maxdepth 1 -type d \! -ipath './music*'
+    find . -mindepth 1 -maxdepth 1 -type d \! -ipath './music*'
 }
 
 _dirs_music() {
-    find -mindepth 1 -maxdepth 1 -type d -ipath './music*'
+    find . -mindepth 1 -maxdepth 1 -type d -ipath './music*'
+}
+
+_dirs_video() {
+    find . -mindepth 1 -maxdepth 1 -type d -ipath './video*'
 }
 
 _dirs_current() {
@@ -22,13 +26,13 @@ _dirs_current() {
 }
 
 _dirs_iot() {
-    # dirs="$(find -mindepth 2 -maxdepth 2 -type d -iname 'in our time*' -printf '%P'\ )"
-    echo */in_our_time*
+    # dirs="$(find . -mindepth 2 -maxdepth 2 -type d -iname 'in our time*' -printf '%P'\ )"
+    echo ./*/in_our_time*
 }
 
 _tmpfile() {
-    prg="$(basename $0)"
-    mktemp -u --tmpdir tmp.$prg.XXXXXXXXXX
+    prg="$(basename "$0")"
+    mktemp -u --tmpdir "tmp.$prg.XXXXXXXXXX"
 }
 
 _nice() {
@@ -38,14 +42,14 @@ _nice() {
 _du() {
     size="$(du -hs "$1")"
     nfiles="$(find "$1" -type f | wc -l)"
-    echo "$nfiles files, "$size""
+    echo "$nfiles files, $size"
 }
 
 _refresh() {
     # Refresh all feeds in parallel.
     #parallel-moreutils -j10 -n10 podxm -c refresh -d -- */*
-    #find -mindepth 2 -type d -print0 | xargs -0 -L10 -P10 podxm -c refresh -d
-    find -mindepth 2 -type d -print0 | xargs -0 -L25 -P4 podxm -c refresh -d
+    #find . -mindepth 2 -type d -print0 | xargs -0 -L10 -P10 podxm -c refresh -d
+    find . -mindepth 2 -type d -print0 | xargs -0 -L25 -P4 podxm -c refresh -d
 }
 
 _sync_playlists() {
@@ -65,7 +69,7 @@ _sync_podcasts() {
     #dirs="$(echo $HOME/podcasts/!(complete*|done*|music*|video*))"
     #dirs="$(echo $HOME/podcasts/!(complete*|done*|video*))"
     dirs="$(echo $HOME/podcasts/$prefix*)"
-    cmd="podxm -c show_files -w oin,1,SD, -d $dirs"
+    cmd="podxm -c show_files -w oin,1,D,D -d $dirs"
 
     $cmd | grep '\.\(mp3\|ogg\)' | head -n $n > "$tmp"
 
@@ -75,7 +79,7 @@ _sync_podcasts() {
 
     #less "$tmp"
     mkdir -p "$dst"
-    rm -rf "$dst"/*
+    rm -rf "${dst:?}"/*
     xargs ln -f -t "$dst" < "$tmp"
     rm "$tmp"
     _du "$dst"
@@ -87,13 +91,16 @@ do_param() {
         _refresh
         ;;
     ui-t)
-        podxm -c ui -w ,1,D,SD -d $(_dirs_talk)
+        podxm -c ui -w ,1,SD,SD -d $(_dirs_talk)
         ;;
     ui-m)
         podxm -c ui -w ,1,Sd,Sd -d $(_dirs_music)
         ;;
+    ui-v)
+        podxm -c ui -w ,1,Sd,Sd -d $(_dirs_video)
+        ;;
     ui-f)
-        podxm -c ui -w f,-1,D,SD -d *
+        podxm -c ui -w f,-1,SD,SD -d ./*
         ;;
     ui-c)
         podxm -c ui -w ,1,D,SD -d $(_dirs_current)
@@ -108,10 +115,13 @@ do_param() {
         _nice podxm -c dl norm -w n,3,d,Sd -d $(_dirs_music)
         ;;
     dl-i)
-        _nice podxm -c dl norm -w oia,-1,,SD --force -d *
+        _nice podxm -c dl norm -w oia,-1,,SD --force -d ./*
         ;;
     norm)
-        _nice podxm -c norm -w foina,-1,,SD -d *
+        _nice podxm -c norm -w foina,-1,,SD -d ./*
+        ;;
+    check)
+        _nice podxm -c check -w foinad,-1,, -d .
         ;;
     sync)
         _sync_playlists
@@ -127,6 +137,7 @@ do_param() {
         ;;
     src)
         $VISUAL "$0"
+        exit
         ;;
     *)
         echo "Unknown parameter: $1"
@@ -137,5 +148,5 @@ do_param() {
 
 for param; do
     echo "#### $param"
-    do_param $param
+    do_param "$param"
 done
