@@ -1,14 +1,17 @@
-(A) 2017-09-09 feed progress (average of entries?)
+(A) 2017-09-15 +fix search!
+(A) 2017-09-09 +add feed progress (average of entries?), especially 0, 1
 (A) Feed.refresh() is too complex (mccabe)
 (A) normalize filenames with html character codes
 (B) +rename Flag to Status? @entry
 (B) 2017-08-09 +rename as_json() to _asdict()? But ParsedDatetime.as_json() returns str
+(B) 2017-09-15 possibility to sort equal-date entries by other field (yle)
 (B) Entry.check(): check for duplicate enclosures; remove this from ui_cmd.py
 (B) Feed.update(): don't mark as modified if not really updated
 (B) I've only seen one feed with multiple enclosures, and they were dupes @entry
 (B) subtitle should not be in entry? @entry
 (B) summary should not be in feeds? @synd
 (C) create classes Downloader, Streamer with subclasses for yle, youtube
+(D) 2017-09-13 use mpv library (package pympv or python-mpv?)
 x 2017-08-09 Add flag for skipped entries? @entry Handled with progress=0.
 x 2017-08-09 Add flag for unseen entries? @synd
 x 2017-09-06 2017-09-06 2017-09-06 check deleted entries in archived feed
