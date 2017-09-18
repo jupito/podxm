@@ -35,7 +35,7 @@ def check_output(args: Sequence[str], **kwargs) -> str:
 
 
 def download_yle(url: str, path: Path, sublang: str = None,
-                 tmpdir: Path = None) -> bool:
+                 tmpdir: Path = None, verbose: bool = True) -> bool:
     """Download file from Yle Areena. Return True if succesful.
 
     `sublang` can be fin, swe, smi, none or all.
@@ -44,6 +44,8 @@ def download_yle(url: str, path: Path, sublang: str = None,
         with tempfile.TemporaryDirectory(suffix='.tmp', prefix='yledl-') as t:
             return download_yle(url, path, sublang=sublang, tmpdir=Path(t))
 
+    if verbose:
+        print('Downloading: {}'.format(path))
     if sublang is None:
         sublang = 'fin'
     # path = Path(path)
