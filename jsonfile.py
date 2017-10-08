@@ -17,7 +17,11 @@ def write_json(fp, obj):
 
 def read_json(fp):
     """Read JSON file."""
-    return json.load(fp, cls=MyJSONDecoder)
+    try:
+        return json.load(fp, cls=MyJSONDecoder)
+    except json.decoder.JSONDecodeError as e:
+        log.error('Error decoding JSON: %s', fp)
+        raise
 
 
 class MyJSONEncoder(json.JSONEncoder):
