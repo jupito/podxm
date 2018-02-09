@@ -1,3 +1,6 @@
+(A) 2018-02-09 +use click for args, (logs?)
+(A) 2018-02-09 +use requests for file download
+(A) 2017-10-18 +use enc.filename_slugified
 (A) 2017-09-15 +fix search!
 (A) 2017-09-09 +add feed progress (average of entries?), especially 0, 1
 (A) Feed.refresh() is too complex (mccabe)
