@@ -4,26 +4,28 @@ import logging
 import shlex
 from pathlib import Path
 
-import jsonfile
-
-import media
-
-from misctypes import Flag
+from blessings import Terminal
+from boltons.strutils import bytes2human, html2text, is_uuid
+from boltons.timeutils import relative_time
 
 import pyutils.files
 import pyutils.misc
-from pyutils.misc import fmt_size
+# from pyutils.misc import fmt_size
 
-from synd import Feed
-
+import jsonfile
+import media
 import util
+from misctypes import Flag
+from synd import Feed
+from util import fmt_strings, fmt_duration, fmt_table, time_fmt
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
+term = Terminal()
 
 WRAPPER = util.MultiWrapper(
-    # width=79,
-    width=-2,
+    width=79,
+    # width=-2,
     max_lines=20,
     break_long_words=False,
     break_on_hyphens=False,
@@ -82,7 +84,7 @@ def read_data(path):
 
 
 class View(util.AttrDict):
-    """A view to a feedlist."""
+    """A view to a feedlist. Giving '.' as flags stands for all flags."""
     DEFAULTS = dict(flags='foin', number=1, sortkey='fpD', sortkey2='SD')
 
     def __init__(self, directory=None, flags=None, number=None, sortkey=None,
@@ -99,6 +101,8 @@ class View(util.AttrDict):
             sortkey = self.DEFAULTS['sortkey']
         if sortkey2 is None:
             sortkey2 = self.DEFAULTS['sortkey2']
+        if flags == '.':
+            flags = list(Flag)
         self.flags = [Flag(x) for x in flags]
         self.number = number
         self.sortkey = sortkey
@@ -165,21 +169,25 @@ def add_url(url):
 def show(header, seq, wrapper=WRAPPER):
     """Show bodies of text prettily, using a TextWrapper object."""
     if header:
+        # messager.msg(term.on_bright_green, *header, term.normal, sep=' ▶ ')
         messager.msg(*header, sep=' ▶ ')
-    for text, title in seq:
-        messager.msg(wrapper.fills(text, title+':'))
+    # for text, title in seq:
+    #     messager.msg(wrapper.fills(text, title+':'))
+    rows = [[y+':', wrapper.fills(x)] for x, y in seq]
+    messager.msg(fmt_table(rows))
 
 
 def show_feed(feed, verbose=0):
     """Show feed."""
+    t_bold = term.bold
     header = [feed.directory, feed.url]
     lst = []
     if verbose:
         lst.extend([
-            (util.time_fmt(feed.head.date, fmt='rfc2822'), 'Date'),
+            (time_fmt(feed.head.date, fmt='rfc2822'), 'Date'),
             (feed.priority, 'Priority'),
             (feed.head.link, 'Link'),
-            (feed.head.title, 'Title'),
+            (t_bold(feed.head.title), 'Title'),
             (feed.head.subtitle, 'Subt'),
             (feed.head.summary, 'Summ'),
             # (feed.head.language or 'unknown', 'Language'),
@@ -192,48 +200,61 @@ def show_feed(feed, verbose=0):
         # List flags and time range.
         def n_flagged(flag):
             return len(feed.list_entries(flags=flag.value))
-        first = util.time_fmt(feed.entries[0].date, fmt='isodate')
-        last = util.time_fmt(feed.entries[-1].date, fmt='isodate')
+        first = time_fmt(feed.entries[0].date, fmt='isodate')
+        last = time_fmt(feed.entries[-1].date, fmt='isodate')
         lst.extend([
-            (', '.join('{} {}'.format(x.name, n_flagged(x)) for x in Flag),
+            (fmt_strings('{} {}'.format(x.name, n_flagged(x)) for x in Flag),
              'Flags'),
             ('earliest {}, latest {}'.format(first, last), 'Range'),
             ])
     show(header, lst)
 
 
+def fmt_time(t):
+    return fmt_strings([time_fmt(t, fmt='isofull'),
+                        relative_time(t, ndigits=1) if t else '-'])
+
+
 def show_entry(entry, verbose=0):
     """Show feed."""
-    date_str = util.time_fmt(entry.date, fmt='isodate')
+    t_bold = term.bold
+
+    def term_bool(x):
+        return term.green if x else term.red
+
+    date_str = time_fmt(entry.date, fmt='isodate')
     header = [date_str, entry.feed.directory, entry.title]
     lst = []
     if verbose:
         lst.extend([
-            (util.time_fmt(entry.date_published, fmt='isofull'), "Publ'd"),
-            (util.time_fmt(entry.date_seen, fmt='isofull'), 'Seen'),
+            (fmt_time(entry.date_published), "Publ'd"),
+            (fmt_time(entry.date_seen), 'Seen'),
             # (entry.score, 'Score'),
-            ((entry.flag.name, entry.progress, entry.score), 'FlPrSc'),
-            (entry.guid, 'GUID'),
+            (fmt_strings([entry.flag.name, entry.progress, entry.score]),
+             'FlPrSc'),
+            (term_bool(is_uuid(entry.guid))(entry.guid), 'GUID'),
             (entry.link, 'Link'),
-            (entry.title, 'Title'),
+            (t_bold(entry.title), 'Title'),
             (entry.subtitle, 'Subt'),
-            (entry.summary, 'Summ'),
+            (html2text(entry.summary), 'Summ'),
             (str(entry.get_tags()), 'Tags'),
             ])
         for enc in entry.encs():
-            d = dict(href=enc.href, length=fmt_size(enc.length), typ=enc.typ,
-                     name=enc.filename)
+            lst.append((fmt_strings([bytes2human(enc.length or 0), enc.typ,
+                                     enc.href]), 'URL'))
             try:
-                d['size'] = fmt_size(enc.size())
-                d['duration'] = util.fmt_duration(enc.duration())
-                d['gain'] = media.get_gain(enc.path)
+                lst.append((fmt_strings([bytes2human(enc.size() or 0),
+                                         fmt_duration(enc.duration()),
+                                         media.get_gain(enc.path),
+                                         enc.filename]), 'File'))
             except FileNotFoundError:
-                d['size'] = d['duration'] = d['gain'] = '-'
-            s = '{length}, {typ}, {href}'
-            lst.append((s.format(**d), 'URL'))
-            s = '{size}, {duration}, {gain}, {name}'
-            lst.append((s.format(**d), 'File'))
+                lst.append((enc.filename, 'File'))
+            ##
+            lst.append((enc.filename, '#Name'))
+            # lst.append((enc.filename_slugified, '#Slug'))
+            ##
     show(header, lst)
+    # messager.msg(WRAPPER.fills(html2text(entry.summary)))
 
 
 def show_files(entry, verbose=0):
@@ -263,12 +284,13 @@ def download_enclosure(enc, maxsize=None):
     if enc.path.exists():
         log.debug('Already exists: %s', enc.path)
     elif enc.is_too_big(maxsize):
-        log.warning('Download too big: %s: %s', fmt_size(enc.length), enc.path)
+        log.warning('Download too big: %s: %s', bytes2human(enc.length or 0),
+                    enc.path)
     else:
         # messager.msg(truncate('Downloading {}: {}'.format(
         #     fmt_size(enc.length), enc.path)))
-        messager.msg('Downloading {}: {}'.format(fmt_size(enc.length),
-                                                 enc.path), truncate=True)
+        # messager.msg('Downloading {}: {}'.format(fmt_size(enc.length),
+        #                                          enc.path), truncate=True)
         try:
             if not enc.download():
                 log.error('Download failed: %s', enc.path)
@@ -292,8 +314,10 @@ def normalize_enclosure(enc, force=False):
 
 def normalize_enclosures(entry, force=False):
     """Normalize loudness in enclosures."""
-    for enc in entry.encs():
-        normalize_enclosure(enc, force=force)
+    tags = entry.feed.get_tags()
+    if force or 'nonorm' not in tags:
+        for enc in entry.encs():
+            normalize_enclosure(enc, force=force)
 
 
 def play_enclosure(enc):
@@ -313,11 +337,20 @@ def play_enclosure(enc):
 
 def play_enclosures(entry, set_flag=True):
     """Play entry enclosures."""
-    exit_codes = (play_enclosure(x) for x in entry.encs())
-    if set_flag and all(x == 0 for x in exit_codes):
+    # exit_codes = (play_enclosure(x) for x in entry.encs())
+    # if set_flag and all(x == 0 for x in exit_codes):
+    #     if entry.flag in [Flag.fresh, Flag.important, Flag.new]:
+    #         messager.msg('Flagging entry as opened')
+    #         entry.set_flag(Flag.opened)
+    #     entry.progress = 1  # TODO: Should be set correctly (embed mpv).
+    if set_flag:
         if entry.flag in [Flag.fresh, Flag.important, Flag.new]:
             messager.msg('Flagging entry as opened')
             entry.set_flag(Flag.opened)
+        entry.progress = 1  # TODO: Should be set correctly (embed mpv).
+        entry.feed.write()
+    exit_codes = [play_enclosure(x) for x in entry.encs()]
+    return exit_codes
 
 
 def remove_enclosure(enc):
@@ -333,6 +366,16 @@ def remove_enclosures(entry, set_flag=True):
     for enc in entry.encs():
         remove_enclosure(enc)
     if set_flag:
-        if entry.flag == Flag.opened:
-            entry.progress = 1
+        # if entry.flag == Flag.opened:
+        #     entry.progress = 1
         entry.set_flag('d')
+
+
+def drop_enc(entry):
+    """Drop enclosure information from entry."""
+    for enc in entry.encs():
+        if enc.path.exists():
+            raise FileExistsError('Enclosure exists: {}'.format(enc.path))
+    del entry.enclosures
+    entry.enclosures = []
+    entry.feed.modified = True
