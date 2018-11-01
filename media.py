@@ -25,7 +25,7 @@ def check_output(args: Sequence[str], **kwargs) -> str:
     log.info('Running: %s', ' '.join(args))
     try:
         return subprocess.check_output(args, universal_newlines=True, **kwargs)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         log.error('Command not found: %s', args[0])
         return None
     except subprocess.CalledProcessError as e:
@@ -35,10 +35,13 @@ def check_output(args: Sequence[str], **kwargs) -> str:
 
 
 def download_yle(url: str, path: Path, sublang: str = None,
-                 tmpdir: Path = None, verbose: bool = True) -> bool:
+                 tmpdir: Path = None, verbose: bool = True,
+                 # backend: str = 'youtubedl,rtmpdump'
+                 backend: str = 'wget,ffmpeg'
+                 ) -> bool:
     """Download file from Yle Areena. Return True if succesful.
 
-    `sublang` can be fin, swe, smi, none or all.
+    `sublang` can be fin, swe, smi, none or all. TODO: changed???
     """
     if tmpdir is None:
         with tempfile.TemporaryDirectory(suffix='.tmp', prefix='yledl-') as t:
@@ -47,19 +50,22 @@ def download_yle(url: str, path: Path, sublang: str = None,
     if verbose:
         print('Downloading: {}'.format(path))
     if sublang is None:
-        sublang = 'fin'
+        sublang = 'all'
     # path = Path(path)
     # tmpdir = Path(tmpdir)
-    stream = tmpdir / 'stream.flv'  # TODO: New yle-dl breaks -o.
-    args = fmt_args('yle-dl --sublang {sublang} -o {o} {url}', sublang=sublang,
-                    o=stream.name, url=url)
+    # stream = tmpdir / 'stream.flv'
+    stream = tmpdir / 'stream'
+    # s = 'yle-dl --backend {be} --sublang {sublang} -o {o} {url}'
+    s = 'yle-dl --sublang {sublang} -o {o} {url}'
+    d = dict(be=backend, sublang=sublang, o=stream.name, url=url)
+    args = fmt_args(s, **d)
     logging.debug(args)
     output = check_output(args, stderr=subprocess.STDOUT, cwd=tmpdir)
     if output is None:
         return False
 
     # Move media file to destination.
-    move(stream, path)
+    move(stream.with_suffix('.flv'), path)
 
     # Move any subtitles, too.
     for sub in iter_subfiles(stream):
@@ -119,7 +125,7 @@ def get_gain(path: Path) -> Union[Gain, None]:
         gain = Gain.parse(attrs[key])
     except (FileNotFoundError, KeyError):
         return None
-    except ValueError as e:
+    except ValueError:
         log.exception('Invalid ReplayGain value: %s', path)
         return None
     return gain
@@ -128,19 +134,29 @@ def get_gain(path: Path) -> Union[Gain, None]:
 def play_file(path: Path, start=None) -> int:
     """Play media."""
     gain = get_gain(path)
+
+    # # XXX: Deprecated.
+    # if gain:
+    #     s = 'replaygain-fallback={}'.format(gain.value)
+    # else:
+    #     s = 'detach'
+    # af = '--af=volume=replaygain-track:{}'.format(s)
+
+    rp = '--replaygain=track'
     if gain:
-        s = 'replaygain-fallback={}'.format(gain.value)
+        fb = '--replaygain-fallback={}'.format(gain.value)
     else:
-        s = 'detach'
-    af = '--af=volume=replaygain-track:{}'.format(s)
-    # args = fmt_args('mpv {af} {path}', af=af, path=path)
+        fb = ''
+
     ad = '--audio-display=no'
+
     if start is not None:
         st = '--start={}%'.format(start * 100)
     else:
         st = ''
-    cmd = 'mpv {af} {ad} {st} {path}'.format(af=af, ad=ad, st=st,
-                                             path=shlex.quote(str(path)))
+
+    cmd = 'mpv {rp} {fb} {ad} {st} {path}'.format(rp=rp, fb=fb, ad=ad, st=st,
+                                                  path=shlex.quote(str(path)))
     args = shlex.split(cmd)
     return call(args)
 
