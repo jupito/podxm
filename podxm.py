@@ -10,18 +10,17 @@ from collections import defaultdict
 from itertools import chain
 from pathlib import Path
 
-import common
-from misctypes import Flag
+from boltons.strutils import bytes2human
 
 from pyutils.args import get_basic_parser
 from pyutils.files import tempfile_and_backup, valid_lines
-from pyutils.misc import fmt_size, get_loglevel, get_progname
+from pyutils.misc import get_loglevel, get_progname
 
-from synd import Feed
-
+import common
 import ui_cmd
-
 import util
+from misctypes import Flag
+from synd import Feed
 
 log = logging.getLogger(get_progname())
 messager = util.Messager(get_progname())
@@ -111,9 +110,10 @@ class Proc(object):
                 n_skipped += 1
             else:
                 n_new += r
-        s = 'Found {} new entries in {} feeds, skipped {} feeds'
-        messager.msg(s.format(n_new, len(self.view.directory) - n_skipped,
-                              n_skipped))
+        if self.args.verbose:
+            s = 'Found {} new entries in {} feeds, skipped {} feeds'
+            messager.msg(s.format(n_new, len(self.view.directory) - n_skipped,
+                                  n_skipped))
 
     def cmd_check(self, path=None):
         """Check feeds. Write list of orphaned files. Using --force forces
@@ -267,7 +267,7 @@ def write_pathlist(paths, path):
     """Write path list."""
     s = 'Writing list of {} orphan files to {}'
     messager.msg(s.format(len(paths), path))
-    lines = ('{} {}'.format(fmt_size(x.stat().st_size), shlex.quote(str(x)))
+    lines = ('{} {}'.format(bytes2human(x.stat().st_size), shlex.quote(str(x)))
              for x in paths)
     with tempfile_and_backup(path, 'w') as f:
         for line in lines:
@@ -295,7 +295,7 @@ def parse_args():
                help='new flag value for setflag command')
     parser.add('--gracetime', type=float, default=5,
                help='refresh grace time in hours')
-    parser.add('--maxsize', type=float, default=300,
+    parser.add('--maxsize', type=float, default=350,
                help='maximum download size (MB)')
     parser.add('--force', action='store_true',
                help='force operation (depends on command)')
