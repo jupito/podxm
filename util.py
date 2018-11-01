@@ -16,6 +16,8 @@ from typing import Callable, List, Mapping, Sequence, TypeVar
 import appdirs
 
 import dateutil.parser
+import slugify  # This is awesome-slugify, not python-slugify.
+import tabulate
 
 import pyutils.misc
 
@@ -104,7 +106,10 @@ class TerminalSizeMixin():
         """Negative adjustment works like python indexing: -2 is 2nd-last."""
         if i < 0:
             return n + i + 1
-        return n + i
+        if i == 0:
+            return n
+        # return n + i
+        return i
 
     @property
     def width(self):
@@ -244,6 +249,11 @@ def fmt_duration(td):
     return '{}:{:02}'.format(int(hours), mins)
 
 
+def fmt_strings(iterable, sep=', '):
+    """Format an iterable of objects as strings."""
+    return sep.join(str(x) for x in iterable)
+
+
 def timedelta_stats(deltas, funcs=None):
     """Calculate statistic from a sequence of timedeltas."""
     if funcs is None:
@@ -278,3 +288,56 @@ def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
         return [m[k(entry)] for m, k in zip(maps, keys)]
     lst.sort(key=final_key)
     return lst
+
+
+def slugify_filename(text, prefix='', suffix='', max_length=255):
+    """Slugify filename using awesome-slugify library."""
+    # TODO: Handle slug uniqueness (duplicate file names).
+
+    # pretranslate = None  # function or dict for replace before translation
+    # translate = unidecode.unidecode  # function for slugifying or None
+    # safe_chars = ''  # additional safe chars
+    # stop_words = ()  # remove these words from slug
+
+    # to_lower = False  # default to_lower value
+    # max_length = None  # default max_length value
+    # separator = '-'  # default separator value
+    # capitalize = False  # default capitalize value
+
+    # Custom slugifier based on slugify_unicode and slugify_filename.
+    custom_slugify = slugify.Slugify(
+        pretranslate={
+            '/': '-',
+            # ': ': '--',
+            '.': '',
+        },
+        translate=None,
+        safe_chars='-.',
+        # stop_words=('a', 'an', 'the'),
+        to_lower=True,
+        max_length=max_length-len(prefix)-len(suffix),
+        separator='_',
+        fold_abbrs=True,  # Turns "e.g." to "eg" etc.
+    )
+    return prefix + custom_slugify(text) + suffix
+
+
+def fmt_table(rows):
+    """Tabulate."""
+    return tabulate.tabulate(rows, tablefmt='plain')
+
+    # rows = [[y, x] for x, y in seq]
+
+    # from itertools import chain, zip_longest
+
+    # def fmt_row(title, text):
+    #     if isinstance(title, str):
+    #         title = title + ':'
+    #     if isinstance(text, str):
+    #         text = wrapper.fills(text)
+    #         yield from (list(x) for x in zip_longest([title],
+    #                                                  text.splitlines()))
+    #     else:
+    #         yield [title, text]
+
+    # rows = chain(fmt_row(x, y) for x, y in rows)
