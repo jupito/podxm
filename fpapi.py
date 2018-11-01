@@ -82,7 +82,7 @@ def get_head(fp):
 def get_enclosure(fp):
     """Construct enclosure."""
     # Length must be converted from string to integer.
-    log.debug('Parsing enclosure: %s', fp.get('href'))
+    # log.debug('Parsing enclosure: %s', fp.get('href'))
     try:
         # return dict(
         #     href=fp['href'],
@@ -102,7 +102,7 @@ def get_enclosure(fp):
 
 def get_entry(fp, feed):
     """Construct feed entry."""
-    log.debug('Parsing entry: %s', get_title(fp))
+    # log.debug('Parsing entry: %s', get_title(fp))
     try:
         return dict(
             feed=feed,
