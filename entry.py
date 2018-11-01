@@ -4,12 +4,11 @@ import logging
 import webbrowser
 from functools import lru_cache, total_ordering
 
-from enclosure import Enclosure, YleEnclosure, YoutubeEnclosure
-
-from misctypes import Flag, TagDict
+from pyutils.misc import int_or_float
 
 import util
-from pyutils.misc import int_or_float
+from enclosure import Enclosure, YleEnclosure, YoutubeEnclosure
+from misctypes import Flag, TagDict
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
@@ -111,9 +110,27 @@ class Entry(object):
         """Entry sanity check."""
         encs = list(self.encs())
         d = dict(e=self, n=len(encs))
+
         if self.date > self.feed.head.date_seen:
             yield ('{e}: Entry claims to be newer than feed: {e.date}' +
                    ' > {e.feed.head.date_seen}').format(**d)
+
+        # if not self.subtitle:
+        #     yield '{e}: Empty subtitle'.format(**d)
+        # if not self.summary:
+        #     yield '{e}: Empty summary'.format(**d)
+        # if self.subtitle and self.subtitle == self.summary:
+        #     yield '{e}: Identical subtitle and summary'.format(**d)
+
+        ##
+        def len_(value):
+            return -1 if value is None else len(value)
+
+        yield 'Subtitle and summary: {} {} {}'.format(
+            len_(self.subtitle), len_(self.summary),
+            str(self.subtitle == self.summary)[0])
+        ##
+
         if d['n'] > 1:
             yield '{e}: Multiple enclosures: {n}'.format(**d)
         if self.flag == Flag.deleted and 'archived' in self.get_tags():
@@ -158,4 +175,5 @@ class Entry(object):
 
     def open_link(self):
         """Open entry link in web browser."""
-        webbrowser.open(self.link)
+        if self.link:
+            webbrowser.open(self.link)
