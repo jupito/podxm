@@ -5,7 +5,7 @@ from enum import Enum, unique
 from functools import total_ordering
 
 import attr
-from attr.validators import in_, instance_of
+from attr.validators import in_, instance_of, optional
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class TagDict(dict):
         return (as_str(k, v) for k, v in self.items())
 
     def __str__(self):
-        return ', '.join(sorted(self.as_strings()))
+        return ','.join(sorted(self.as_strings()))
 
     @staticmethod
     def split_tag(tag, sep='=', default=None):
@@ -92,3 +92,24 @@ class Gain(object):
     @classmethod
     def parse(cls, s):
         return cls(*s.split())
+
+    def _asdict(self):
+        return attr.asdict(self)
+
+
+@attr.s(frozen=True)
+class Lang(object):
+    """Language (and maybe country) code."""
+    lang = attr.ib(validator=instance_of(str))
+    country = attr.ib(default=None, validator=optional(instance_of(str)))
+
+    def __attrs_post_init__(self):
+        assert all(len(x) == 2 for x in filter(None, [self.lang,
+                                                      self.country])), self
+
+    def __str__(self):
+        return '_'.join(filter(None, [self.lang, self.country]))
+
+    @classmethod
+    def parse(cls, s):
+        return cls(*s.split('_'))
