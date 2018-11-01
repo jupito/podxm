@@ -6,15 +6,13 @@ import cmd
 import logging
 import shlex
 
-import common
-from common import View
-
 import pyutils.misc
 
+import common
 import synd
-from synd import Flag
-
 import util
+from common import View
+from synd import Flag
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
@@ -121,46 +119,16 @@ class UI(cmd.Cmd):
         """Feed of current entry."""
         return self.entry.feed
 
-    def get_row(self, i=None):
+    def get_row(self, i):
         """Get a line of info for the prompt or line selector."""
-        if i is None:
-            i = self.i
         entry = self.entries[i]
-
-        def encs_char(entry):
-            """Return a single-character enclosure status string."""
-            encs = list(entry.encs())
-            nencs = len(encs)
-            ndownloaded = sum(x.path.exists() for x in encs)
-            nnormalized = sum(x.is_normalized() for x in encs)
-            if not encs:
-                return '-'
-            if nencs > 9:
-                return '+'
-            if ndownloaded == 0:
-                return str(nencs)
-            if nencs != ndownloaded:
-                return chr(ord('a') + ndownloaded)
-            else:
-                return chr(ord('A') + nnormalized)
-
-        def index_mark(i):
-            # return '*' if i == len(self.entries) - 1 else ''
-            if len(self.entries) == 0:
-                return '-'
-            if i == 0:
-                return '•'
-            if i == len(self.entries) - 1:
-                return '◘'
-            marks = '▁▂▃▄▅▆▇█'
-            return marks[int(i / len(self.entries) * len(marks))]
-
         d = dict(
             i=i,
-            iwidth=len(str(len(self.entries) - 1)),
             # n=len(self.entries),
-            im=index_mark(i),
+            iwidth=len(str(len(self.entries) - 1)),
+            im=index_mark(i, self.entries),
             nfe=entry.feed._nentries or -1,
+            tfe=len(entry.feed.entries or []),
             flag=entry.flag.value,
             dir=entry.feed.directory,
             d=util.time_fmt(entry.date, fmt='compactdate'),
@@ -170,11 +138,15 @@ class UI(cmd.Cmd):
             t=entry.abbreviated_title,
             # ep=entry.progress,
             # fp=entry.feed.progress,
+
+            # B=common.term.bold,
+            # N=common.term.normal,
             )
         # s = '{flag}{dl}{nl} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
         # s = '{flag}{ec} {i:2d}/{n:2d} {nfe:2d} {d} {dir}●{t}'
-        s = '{im}{i:{iwidth}} {flag}{ec} {nfe:2d} {d} {dir}◆{t}'
-        # s = '{im}{i:{iwidth}} {flag}{ec} {nfe:2d} {d} [{fp:1.2f} {ep:1.2f}] {dir}◆{t}'
+        s = '{im}{i:{iwidth}} {flag}{ec} {nfe:2d}/{tfe:2d} {d} {dir}◆{t}'
+        # s = ('{im}{i:{iwidth}} {flag}{ec} {nfe:2d} {d} '
+        #      '[{fp:1.2f} {ep:1.2f}] {dir}◆{t}')
         return s.format(**d)
 
     def get_row_with_duplicate_entries(self, i=None):
@@ -194,17 +166,25 @@ class UI(cmd.Cmd):
         ext_entries = (x for x in self.entries if x.feed.directory !=
                        entry.feed.directory)
         nhits = sum(_urls(x) == _urls(entry) for x in ext_entries)
-        return '{} {}'.format(nhits, self.get_row(i=i))
+        return '{} {}'.format(nhits, self.get_row(i))
 
     def get_prompt(self):
         """Get command prompt string. Long entry titles are shortened."""
         s = '{{x}} [{default}] '.format(default=self.lastline)
-        x = pyutils.misc.truncate(self.get_row(), reserved=len(s))
+        x = pyutils.misc.truncate(self.get_row(self.i), reserved=len(s))
         return s.format(x=x)
 
     @property
     def intro(self):
         return 'Welcome: {}'.format(len(self.entries))
+
+    def help_sorting(self):
+        keys = ''.join(synd.SORTKEYS.keys())
+        messager.feedback(f'Sort keys: {keys}.')
+
+    def help_flags(self):
+        flags = ', '.join(f'{x.value}: {x.name}' for x in Flag)
+        messager.feedback(f'Flags: {flags}.')
 
     @property
     def prompt(self):
@@ -346,7 +326,7 @@ class UI(cmd.Cmd):
         """Play enclosures, flag as open if successful."""
         # set_flag = bool(int(arg or 1))
         set_flag = str_as_bool(arg, True)
-        common.show_entry(self.entry, verbose=2)
+        # common.show_entry(self.entry, verbose=2)
         common.download_enclosures(self.entry)
         common.normalize_enclosures(self.entry)
         common.play_enclosures(self.entry, set_flag=set_flag)
@@ -360,6 +340,14 @@ class UI(cmd.Cmd):
             common.remove_enclosures(self.entry, set_flag=set_flag)
             self.entry.feed.write()
         except ValueError as e:
+            messager.feedback(e)
+
+    def do_drop_enc(self, arg):
+        """Drop enclosures from entry (to add them anew on refresh)."""
+        try:
+            common.drop_enc(self.entry)
+            self.feed.write()
+        except FileExistsError as e:
             messager.feedback(e)
 
     def do_set(self, arg):
@@ -436,6 +424,39 @@ class UI(cmd.Cmd):
     do_u = do_update
     do_v = do_view
     do_z = do_zoom
+
+
+def index_mark(i, n):
+    """Represent relative index as a character."""
+    empty, first, last, error = '-', '•', '◘', '!'
+    marks = '▁▂▃▄▅▆▇█'
+    if len(n) == 0:
+        return empty
+    if i == 0:
+        return first
+    if i == len(n) - 1:
+        return last
+    if i < 0 or i > len(n):
+        return error
+    return marks[int(i / len(n) * len(marks))]
+
+
+def encs_char(entry):
+    """Return a single-character enclosure status string."""
+    encs = list(entry.encs())
+    nencs = len(encs)
+    ndownloaded = sum(x.path.exists() for x in encs)
+    nnormalized = sum(x.is_normalized() for x in encs)
+    if not encs:
+        return '-'
+    if nencs > 9:
+        return '+'
+    if ndownloaded == 0:
+        return str(nencs)
+    if nencs != ndownloaded:
+        return chr(ord('a') + ndownloaded)
+    else:
+        return chr(ord('A') + nnormalized)
 
 
 def str_as_bool(value: str, default: bool) -> bool:
