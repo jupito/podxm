@@ -14,12 +14,10 @@ from pathlib import Path
 from statistics import mean
 
 import common
-from entry import Entry
-
 import fpapi
-from misctypes import Flag, TagDict
-
 import util
+from entry import Entry
+from misctypes import Flag, TagDict
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
@@ -88,7 +86,7 @@ class Feed(object):
     def should_skip(self, gracetime=None):
         """Skip refresh or not? Gracetime given in hours."""
         tags = self.get_tags()
-        if 'inactive' in tags:
+        if any(x in tags for x in 'inactive complete done'.split()):
             return True
         if 'gracetime' in tags:
             gracetime = float(tags['gracetime'])
@@ -103,6 +101,7 @@ class Feed(object):
         """Retrieve and parse, if needed or forced. Return the number of
         updated entries, or None if feed skipped. Gracetime given in hours.
         """
+        # TODO: Raise exceptions instead of return on error.
         if not force:
             if self.should_skip(gracetime):
                 log.debug('Skipping refresh: %s', self)
@@ -125,26 +124,34 @@ class Feed(object):
         if status == HTTPStatus.MOVED_PERMANENTLY:
             log.warning('Permanent redirect: %s moved from %s to %s', self,
                         self.url, fp.href)
+            assert self.url != fp.href, self.url
             self.old_url, self.url = self.url, fp.href
             return self.refresh(force=True)
-        elif status == HTTPStatus.FOUND:
-            log.warning('Feed temporarily redirected: %s', self)
+
         elif status == HTTPStatus.NOT_MODIFIED:
-            log.debug('Skipping refresh: %s', self)
+            log.debug('Skipping refresh (not modified): %s', self)
             return None  # No need to download. Don't change anything.
         elif status == HTTPStatus.NOT_FOUND:
             log.error('Feed not found: %s: %s', self.directory, self.url)
             return None
+        elif status == HTTPStatus.INTERNAL_SERVER_ERROR:
+            log.warning('Internal server error: %s', self)
+            return None
         elif status == HTTPStatus.UNAUTHORIZED:
-            log.warning('Feed password-protected: %s', self)
+            log.error('Feed password-protected: %s', self)
+            return None
         elif status == HTTPStatus.GONE:
-            log.warning('Feed gone, should stop polling: %s', self)
+            log.warning('Feed gone, please stop polling: %s', self)
+            return None
+
+        elif status == HTTPStatus.FOUND:
+            log.debug('Feed temporarily redirected: %s', self)
         elif status not in [HTTPStatus.OK]:
             log.warning('%s: Weird HTTP status: %s', self, status.name)
         try:
             return self.update(fp)
         except (KeyError, AttributeError) as e:
-            log.error('Error parsing feed: %s: %s', self, e)
+            log.error('Error parsing feed: %s: %s: %s', self, e, self.url)
             return 0
 
     def update(self, fp):
@@ -257,7 +264,7 @@ class Feed(object):
         log.debug('%s %s %s', deltas, stats, names)
         return stats[0] / 2
 
-    def check(self):
+    def check(self, verbose=False):
         """Feed sanity check."""
         status = HTTPStatus(self.parseinfo['status'])
         if status not in [HTTPStatus.OK, HTTPStatus.FOUND,
@@ -265,15 +272,34 @@ class Feed(object):
             yield 'Weird HTTP status: {}'.format(status.name)
         if self.parseinfo['bozo']:
             yield 'Bozo: {}'.format(self.parseinfo['bozo'])
-        if not self.entries:
-            yield 'No entries'
+
+        # if not self.head.subtitle:
+        #     yield 'Empty subtitle'
+        # if not self.head.summary:
+        #     yield 'Empty summary'
+        # if self.head.subtitle and self.head.subtitle == self.head.summary:
+        #     yield 'Identical subtitle and summary'
+
+        ##
+        def len_(value):
+            return -1 if value is None else len(value)
+
+        yield 'Subtitle and summary: {} {} {}'.format(
+            len_(self.head.subtitle), len_(self.head.summary),
+            str(self.head.subtitle == self.head.summary)[0])
+        ##
+
         tags = self.get_tags()
-        for tag in self.get_tags():
+        for tag in tags:
             if not tags.is_sane(tag):
                 yield 'Weird tag: {}'.format(tag)
-        for e in self.entries:
-            for msg in e.check():
-                yield msg
+
+        if not self.entries:
+            yield 'No entries'
+        if verbose:
+            for e in self.entries:
+                for msg in e.check():
+                    yield msg
         orphans = self.get_orphans()
         if orphans:
             yield 'Orphan files: {}'.format(len(orphans))
@@ -290,7 +316,8 @@ class Feed(object):
 
     def open_link(self):
         """Open feed link in web browser."""
-        webbrowser.open(self.head.link)
+        if self.head.link:
+            webbrowser.open(self.head.link)
 
     @lru_cache()
     def get_tags(self):
@@ -300,6 +327,11 @@ class Feed(object):
             tags.parse(s)
         for s in self.head.tags:
             tags.parse(s)
+        if self.head.language:
+            if 'lang' in tags and tags['lang'] != self.head.language:
+                log.debug('Overriding language tag %s with %s', tags['lang'],
+                          self.head.language)
+            tags['lang'] = self.head.language
         return tags
 
     @property
@@ -381,12 +413,15 @@ def search_entries(entries, patterns, flags=re.IGNORECASE, start=0):
     """Return index to first entry from start matching all RegExp patterns."""
     def get_strings(entry):
         """Return strings to match against."""
-        return [str(entry.feed.directory), entry.feed.head.title,
-                entry.feed.head.subtitle, entry.feed.head.summary, entry.title,
-                entry.subtitle, entry.summary]
+        return list(filter(None, [str(entry.feed.directory),
+                                  entry.feed.head.title,
+                                  entry.feed.head.subtitle,
+                                  entry.feed.head.summary, entry.title,
+                                  entry.subtitle, entry.summary]))
 
     def pattern_found(strings, pattern, flags):
         """Try matching."""
+        # log.warning([strings, pattern])
         return any(re.search(pattern, x, flags=flags) for x in strings)
 
     for i, entry in enumerate(entries[start:], start):
