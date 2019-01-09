@@ -180,8 +180,7 @@ class Feed():
         assert len(present) < 2, len(present)
         if not present:
             # log.warning('Adding entry: %s: %s', self, entry)
-            messager.msg('Adding entry: {}: {}'.format(self, entry),
-                         truncate=True)
+            messager.msg(f'Adding entry: {self}: {entry}', truncate=True)
             # ##
             # import shutil
             # print('####', shutil.get_terminal_size().columns)
@@ -248,7 +247,7 @@ class Feed():
         if include_now:
             dates.append(datetime.datetime.utcnow())
         if len(dates) < 3:
-            raise ValueError('Not enough entries: {}'.format(self))
+            raise ValueError(f'Not enough entries: {self}')
         deltas = [t2 - t1 for t1, t2 in zip(dates, dates[1:])]
         stats = util.timedelta_stats(deltas)
         daydeltas = map(util.timedelta_floatdays, deltas)
@@ -269,9 +268,9 @@ class Feed():
         status = HTTPStatus(self.parseinfo['status'])
         if status not in [HTTPStatus.OK, HTTPStatus.FOUND,
                           HTTPStatus.NOT_MODIFIED]:
-            yield 'Weird HTTP status: {}'.format(status.name)
+            yield f'Weird HTTP status: {status.name}'
         if self.parseinfo['bozo']:
-            yield 'Bozo: {}'.format(self.parseinfo['bozo'])
+            yield f'Bozo: {self.parseinfo["bozo"]}'
 
         # if not self.head.subtitle:
         #     yield 'Empty subtitle'
@@ -292,7 +291,7 @@ class Feed():
         tags = self.get_tags()
         for tag in tags:
             if not tags.is_sane(tag):
-                yield 'Weird tag: {}'.format(tag)
+                yield f'Weird tag: {tag}'
 
         if not self.entries:
             yield 'No entries'
@@ -302,7 +301,7 @@ class Feed():
                     yield msg
         orphans = self.get_orphans()
         if orphans:
-            yield 'Orphan files: {}'.format(len(orphans))
+            yield f'Orphan files: {len(orphans)}'
 
     def get_orphans(self):
         """Return list of orphaned files in feed directory."""
