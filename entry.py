@@ -15,7 +15,7 @@ messager = util.Messager(__name__)
 
 
 @total_ordering
-class Entry(object):
+class Entry():
     """Feed entry."""
     def __init__(self, feed, guid, link, date_published, date_seen, author,
                  title, subtitle, summary, enclosures, tags, flag=Flag.fresh,

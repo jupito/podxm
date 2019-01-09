@@ -62,7 +62,7 @@ class ParsedDatetime(datetime.datetime):
         return self.isoformat()
 
 
-class Messager(object):
+class Messager():
     """Message mediation."""
     def __init__(self, name='root', verbosity=0, sep=' ', end='\n',
                  file=sys.stdout, flush=False, truncate=False):

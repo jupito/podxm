@@ -81,7 +81,7 @@ class TagDict(dict):
 
 
 @attr.s(frozen=True)
-class Gain(object):
+class Gain():
     """ReplayGain level."""
     value = attr.ib(validator=instance_of(float), convert=float)
     unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
@@ -98,7 +98,7 @@ class Gain(object):
 
 
 @attr.s(frozen=True)
-class Lang(object):
+class Lang():
     """Language (and maybe country) code."""
     lang = attr.ib(validator=instance_of(str))
     country = attr.ib(default=None, validator=optional(instance_of(str)))

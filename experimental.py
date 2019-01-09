@@ -71,7 +71,7 @@ def generate_guid(fp):
 
 # media.py
 from functools import lru_cache
-class MediaSource(object):
+class MediaSource():
     def __init__(self, path):
         self.path = path
 

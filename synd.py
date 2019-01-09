@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
 
 
-class Head(object):
+class Head():
     """Feed header."""
     def __init__(self, link, date_published, date_seen, author, title,
                  subtitle, summary, generator, language, publisher, rights,
@@ -52,7 +52,7 @@ class Head(object):
         return self.date_published or self.date_seen
 
 
-class Feed(object):
+class Feed():
     FEEDFILE = 'data.json'  # Feed information file.
     BAKEXT = '.bak'
 

@@ -14,7 +14,7 @@ import util
 log = logging.getLogger(__name__)
 
 
-class Enclosure(object):
+class Enclosure():
     """Feed entry enclosure."""
     def __init__(self, entry, href, length, typ):
         """Create new enclosure."""

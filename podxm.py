@@ -27,7 +27,7 @@ messager = util.Messager(get_progname())
 user_dirs = util.AppDirsPathlib(get_progname())
 
 
-class Proc(object):
+class Proc():
     """Program process state information."""
     session_path = user_dirs.user_cache_dir / 'session.json'
     orphans_path = user_dirs.user_cache_dir / 'orphans.txt'
