@@ -126,7 +126,7 @@ class UI(cmd.Cmd):
             i=i,
             # n=len(self.entries),
             iwidth=len(str(len(self.entries) - 1)),
-            im=index_mark(i, self.entries),
+            im=util.index_mark(i, self.entries),
             nfe=entry.feed._nentries or -1,
             tfe=len(entry.feed.entries or []),
             flag=entry.flag.value,
@@ -424,21 +424,6 @@ class UI(cmd.Cmd):
     do_u = do_update
     do_v = do_view
     do_z = do_zoom
-
-
-def index_mark(i, n):
-    """Represent relative index as a character."""
-    empty, first, last, error = '-', '•', '◘', '!'
-    marks = '▁▂▃▄▅▆▇█'
-    if len(n) == 0:
-        return empty
-    if i == 0:
-        return first
-    if i == len(n) - 1:
-        return last
-    if i < 0 or i > len(n):
-        return error
-    return marks[int(i / len(n) * len(marks))]
 
 
 def encs_char(entry):
