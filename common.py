@@ -264,6 +264,7 @@ def show_files(entry, verbose=0):
 
 
 def show_enclosure(enc):
+    """Show enclosure."""
     if enc.path.exists():
         messager.msg('Media info:')
         messager.pp(media.get_media_info(enc.path))
@@ -280,6 +281,7 @@ def show_enclosures(entry):
 
 
 def download_enclosure(enc, maxsize=None):
+    """Download enclosure."""
     if enc.path.exists():
         log.debug('Already exists: %s', enc.path)
     elif enc.is_too_big(maxsize):
@@ -306,6 +308,7 @@ def download_enclosures(entry, maxsize=None):
 
 
 def normalize_enclosure(enc, force=False):
+    """Normalize enclosure."""
     if enc.path.exists():
         if force or not enc.is_normalized():
             media.normalize_volume(enc.path)
@@ -320,6 +323,7 @@ def normalize_enclosures(entry, force=False):
 
 
 def play_enclosure(enc):
+    """Play enclosure."""
     try:
         if enc.path.exists():
             exit_code = enc.play()
