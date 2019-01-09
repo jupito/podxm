@@ -445,4 +445,8 @@ def encs_char(entry):
 
 def str_as_bool(value: str, default: bool) -> bool:
     """Interpret a string as boolean."""
-    return bool(int(value or default))
+    try:
+        return bool(int(value or default))
+    except ValueError:
+        messager.feedback(f'Weird boolean, defaulting to {default}: {value}')
+        return default
