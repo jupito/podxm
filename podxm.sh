@@ -34,7 +34,8 @@ _dirs() {
         ;;
     _music)
         #dirs_music="$(find . -mindepth 1 -maxdepth 1 -type d -ipath './music*')"
-        find ongoing* -mindepth 1 -maxdepth 1 -type d -ipath '*/music*'
+        #find ongoing* -mindepth 1 -maxdepth 1 -type d -ipath '*/music*'
+        find ./* -mindepth 1 -maxdepth 1 -type d -ipath '*/music*'
         ;;
     _video)
         find ./* -mindepth 1 -maxdepth 1 -type d -ipath '*/video*'
