@@ -36,7 +36,7 @@ class Flag(Enum):
 
     def score(self):
         """Score associated with flag."""
-        return (self.index()-3) * -100
+        return (self.index() - 3) * -100
 
     def as_json(self):
         """Represent as JSON (one-way conversion)."""
@@ -87,7 +87,7 @@ class Gain():
     unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
 
     def __str__(self):
-        return '{0.value} {0.unit}'.format(self)
+        return f'{self.value} {self.unit}'
 
     @classmethod
     def parse(cls, s):
