@@ -55,7 +55,7 @@ class UI(cmd.Cmd):
         """Read data."""
         # s = 'Reading with f={flags}, s={sortkey}, n={number}, S={sortkey2}'
         # message(s.format(**self.view))
-        messager.msg('Reading with {}'.format(self.view))
+        messager.msg(f'Reading with {self.view}')
         if force:
             self.proc.clear_cache()
         entries = list(self.proc.generate_entries(view=self.view))
@@ -65,7 +65,7 @@ class UI(cmd.Cmd):
     def write_data(self, force=False):
         """Write data."""
         feeds = self.proc.open_feeds.values()
-        messager.msg('Writing {} feeds'.format(len(feeds)))
+        messager.msg(f'Writing {len(feeds)} feeds')
         for feed in feeds:
             feed.write(force=force)
 
@@ -166,7 +166,7 @@ class UI(cmd.Cmd):
         ext_entries = (x for x in self.entries if x.feed.directory !=
                        entry.feed.directory)
         nhits = sum(_urls(x) == _urls(entry) for x in ext_entries)
-        return '{} {}'.format(nhits, self.get_row(i))
+        return f'{nhits} {self.get_row(i)}'
 
     def get_prompt(self):
         """Get command prompt string. Long entry titles are shortened."""
@@ -176,7 +176,7 @@ class UI(cmd.Cmd):
 
     @property
     def intro(self):
-        return 'Welcome: {}'.format(len(self.entries))
+        return f'Welcome: {len(self.entries)}'
 
     def help_sorting(self):
         keys = ''.join(synd.SORTKEYS.keys())
@@ -244,7 +244,7 @@ class UI(cmd.Cmd):
             try:
                 self.i = int(arg or 0)
             except ValueError:
-                messager.feedback('Invalid location: {}'.format(arg))
+                messager.feedback(f'Invalid location: {arg}')
 
     def do_list(self, arg):
         # lines = ('{e.feed}: {e}'.format(e=x) for x in self.entries)
@@ -269,7 +269,7 @@ class UI(cmd.Cmd):
         if patterns:
             i = synd.search_entries(self.entries, patterns, start=self.i+1)
             if i is None:
-                messager.feedback('Not found: {}'.format(patterns))
+                messager.feedback(f'Not found: {patterns}')
             else:
                 self.i = i
             self.proc.session['search_patterns'] = patterns
@@ -371,7 +371,7 @@ class UI(cmd.Cmd):
         entries = self.entries if arg == 'all' else [self.entry]
         for e in entries:
             if e.flag == Flag.fresh:
-                s = 'Flagging {0.flag.name} entry as new: {0}'.format(e)
+                s = f'Flagging {e.flag.name} entry as new: {e}'
                 messager.feedback(s)
                 e.set_flag(Flag.new)
                 e.feed.write()
@@ -382,10 +382,10 @@ class UI(cmd.Cmd):
         d = dict(self.view, directory=[self.feed.directory], number=-1)
         view = View(**d)
         view = view.parse(viewstring)
-        messager.msg('Zooming to feed "{}"'.format(self.feed.directory))
+        messager.msg(f'Zooming to feed "{self.feed.directory}"')
         ui = UI(self.proc, view=view)
         ui.run()
-        messager.msg('Returning to {} feeds'.format(len(self.view.directory)))
+        messager.msg(f'Returning to {len(self.view.directory)} feeds')
 
     def do_update(self, arg):
         """Update view."""
