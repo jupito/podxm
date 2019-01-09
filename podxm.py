@@ -265,8 +265,7 @@ def parse_config(parser):
 
 def write_pathlist(paths, path):
     """Write path list."""
-    s = 'Writing list of {} orphan files to {}'
-    messager.msg(s.format(len(paths), path))
+    messager.msg(f'Writing list of {len(paths)} orphan files to {path}')
     lines = (str(x) for x in paths)
     with tempfile_and_backup(path, 'w') as f:
         for line in lines:
