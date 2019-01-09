@@ -22,7 +22,7 @@ messager = util.Messager(__name__)
 
 class UI(cmd.Cmd):
     """Show entries interactively."""
-    intro = 'Welcome'
+    # intro = 'Welcome'
     separator = ';'  # Separator for multiple commands on one line.
 
     def __init__(self, proc, view=None):
