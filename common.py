@@ -123,7 +123,7 @@ class View(util.AttrDict):
             lst += [''] * (4 - len(lst))  # Fill in missing parts.
         try:
             flags, number, sortkey, sortkey2 = lst
-        except ValueError as e:
+        except ValueError:
             log.error('Cannot parse view: "%s"', s)
             raise
         return self.__class__(
