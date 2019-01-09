@@ -165,7 +165,7 @@ class Entry():
         if lst:
             return lst[0]
         else:
-            raise FileNotFoundError('No enclosures: {}'.format(self))
+            raise FileNotFoundError(f'No enclosures: {self}')
 
     def duration(self):
         return sum((x.duration() or 0) for x in self.enclosures)

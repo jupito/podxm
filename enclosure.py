@@ -45,7 +45,7 @@ class Enclosure():
         """Filename on disk."""
         date_str = util.time_fmt(self.entry.date, fmt='isodate')
         title = self.entry.title[:80]
-        name = '{d}_{t}{e}'.format(d=date_str, t=title, e=self.suffix)
+        name = f'{date_str}_{title}{self.suffix}'
         name = name.replace('/', '%')
         return name
 
@@ -102,7 +102,7 @@ class Enclosure():
         if self.path.exists():
             # self.path.unlink()
             pyutils.files.trash_or_rm(self.path)
-        for path in self.path.parent.glob('{}.*.srt'.format(self.path.stem)):
+        for path in self.path.parent.glob(f'{self.path.stem}.*.srt'):
             logging.warning('Removing subtitle: %s', path)
 
 

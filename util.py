@@ -246,7 +246,7 @@ def fmt_duration(td):
         return '?:?'
     hours, secs = divmod(td.total_seconds(), 60**2)
     mins = round(secs / 60)
-    return '{}:{:02}'.format(int(hours), mins)
+    return f'{int(hours)}:{mins:02}'
 
 
 def fmt_strings(iterable, sep=', '):
