@@ -48,7 +48,7 @@ def download_yle(url: str, path: Path, sublang: str = None,
             return download_yle(url, path, sublang=sublang, tmpdir=Path(t))
 
     if verbose:
-        print('Downloading: {}'.format(path))
+        print(f'Downloading: {path}')
     if sublang is None:
         sublang = 'all'
     # path = Path(path)
@@ -78,8 +78,7 @@ def download_yle(url: str, path: Path, sublang: str = None,
 
 def iter_subfiles(path: Path) -> Iterable[Path]:
     """Glob any subtitle files downloaded with mediafile."""
-    pattern = '{}.*.srt'.format(path.name)
-    return path.parent.glob(pattern)
+    return path.parent.glob(f'{path.name}.*.srt')
 
 
 def get_media_info(path: Path) -> dict:
@@ -112,7 +111,8 @@ def get_duration(path: Path) -> Union[datetime.timedelta, None]:
 def normalize_volume(path: Path) -> int:
     """Normalize volume."""
     # args = fmt_args('volnorm -s {path}', path=path)
-    cmd = 'volnorm -s {path}'.format(path=shlex.quote(str(path)))
+    quoted = shlex.quote(str(path))
+    cmd = f'volnorm -s {quoted}'
     args = shlex.split(cmd)
     return call(args)
 
@@ -144,19 +144,19 @@ def play_file(path: Path, start=None) -> int:
 
     rp = '--replaygain=track'
     if gain:
-        fb = '--replaygain-fallback={}'.format(gain.value)
+        fb = f'--replaygain-fallback={gain.value}'
     else:
         fb = ''
 
     ad = '--audio-display=no'
 
     if start is not None:
-        st = '--start={}%'.format(start * 100)
+        st = f'--start={start * 100}%'
     else:
         st = ''
 
-    cmd = 'mpv {rp} {fb} {ad} {st} {path}'.format(rp=rp, fb=fb, ad=ad, st=st,
-                                                  path=shlex.quote(str(path)))
+    quoted = shlex.quote(str(path))
+    cmd = f'mpv {rp} {fb} {ad} {st} {quoted}'
     args = shlex.split(cmd)
     return call(args)
 
