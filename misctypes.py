@@ -87,7 +87,7 @@ class Gain():
     unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
 
     def __str__(self):
-        return f'{self.value} {self.unit}'
+        return f'{self.value}{self.unit}'
 
     @classmethod
     def parse(cls, s):
