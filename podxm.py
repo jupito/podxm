@@ -267,8 +267,7 @@ def write_pathlist(paths, path):
     """Write path list."""
     s = 'Writing list of {} orphan files to {}'
     messager.msg(s.format(len(paths), path))
-    lines = ('{} {}'.format(bytes2human(x.stat().st_size), shlex.quote(str(x)))
-             for x in paths)
+    lines = (str(x) for x in paths)
     with tempfile_and_backup(path, 'w') as f:
         for line in lines:
             # If formatting needed, this seems fastest: '%s\n' % line
