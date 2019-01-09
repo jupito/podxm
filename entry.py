@@ -58,7 +58,7 @@ class Entry():
         ellipsis = '…'
         title = self.title
         if self.feed.head and self.feed.head.title:
-            # title = title.replace(self.feed.head.title + ': ', ellipsis)
+            title = title.replace(self.feed.head.title + ': ', ellipsis)
             title = title.replace(self.feed.head.title, ellipsis)
         return title
 
