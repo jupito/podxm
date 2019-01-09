@@ -86,9 +86,9 @@ class Proc():
         """Add feeds from URLs."""
         for url in urls:
             if self.args.verbose:
-                messager.msg('Adding: {}'.format(url))
+                messager.msg(f'Adding: {url}')
             directory = common.add_url(url)
-            messager.msg('Created: {}'.format(directory))
+            messager.msg(f'Created: {directory}')
 
     def cmd_add(self):
         """Add feeds from URLs."""
@@ -137,7 +137,7 @@ class Proc():
             for feed in self.generate_feeds():
                 s = feed.get_tags().get('dl')
                 if s:
-                    view = self.view.parse(',{},,'.format(s))
+                    view = self.view.parse(f',{s},,')
                     self.views[feed.directory] = view
                     # print(feed, self.views[feed.directory])
         for entry in self.generate_entries():
@@ -184,7 +184,7 @@ class Proc():
                 for tag in feed.get_tags().as_strings():
                     tag_count[tag] += 1
         for tag, cnt in sorted(tag_count.items()):
-            messager.msg('{cnt:7} {tag}'.format(cnt=cnt, tag=tag))
+            messager.msg(f'{cnt:7} {tag}')
 
     def cmd_show_dates(self):
         """Show stats about publish date deltas, or deltas themselves
@@ -201,7 +201,7 @@ class Proc():
                 log.warning('Daystats not available for feed "%s"', feed)
             else:
                 values = sorted(deltas) if self.args.verbose else stats
-                lst = ['{: >7.1f}'.format(x) for x in values] + [feed]
+                lst = ['f{x: >7.1f}' for x in values] + [feed]
                 messager.msg(*lst)
             # log.info('%.2f %s', feed.wait_to_refresh(), feed)
         if not self.args.verbose and names is not None:
@@ -217,13 +217,13 @@ class Proc():
             days.setdefault((d.year, d.month, d.day), []).append(entry)
         for k, v in sorted(months.items())[-2:]:
             messager.msg()
-            messager.msg('#### {} ####'.format(k))
+            messager.msg(f'#### {k} ####')
             messager.msg()
             for entry in sorted(v):
                 common.show_entry(entry, verbose=self.args.verbose)
         for k, v in sorted(days.items())[-2:]:
             messager.msg()
-            messager.msg('#### {} ####'.format(k))
+            messager.msg(f'#### {k} ####')
             messager.msg()
             for entry in sorted(v):
                 common.show_entry(entry, verbose=self.args.verbose)
@@ -248,7 +248,7 @@ class Proc():
 def get_config_paths():
     """Return default configuration files."""
     dirnames = [user_dirs.user_config_dir, '.']
-    filename = '{}.cfg'.format(get_progname())
+    filename = f'{get_progname()}.cfg'
     paths = [Path(x) / filename for x in dirnames]
     return [x for x in paths if x.exists()]
 
@@ -256,7 +256,7 @@ def get_config_paths():
 def parse_config(parser):
     """Parse configuration files."""
     prefix = parser.fromfile_prefix_chars[0]
-    args = ['{}{}'.format(prefix, x) for x in get_config_paths()]
+    args = [f'{prefix}{x}' for x in get_config_paths()]
     return parser.parse_args(args)
 
 
