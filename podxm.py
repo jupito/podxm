@@ -5,12 +5,9 @@
 # FIXME: Don't use logging for normal output.
 
 import logging
-import shlex
 from collections import defaultdict
 from itertools import chain
 from pathlib import Path
-
-from boltons.strutils import bytes2human
 
 from pyutils.args import get_basic_parser
 from pyutils.files import tempfile_and_backup, valid_lines
