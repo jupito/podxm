@@ -440,8 +440,7 @@ def encs_char(entry):
         return str(nencs)
     if nencs != ndownloaded:
         return chr(ord('a') + ndownloaded)
-    else:
-        return chr(ord('A') + nnormalized)
+    return chr(ord('A') + nnormalized)
 
 
 def str_as_bool(value: str, default: bool) -> bool:
