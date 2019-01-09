@@ -150,7 +150,7 @@ class View(util.AttrDict):
 def check_feed(feed, verbose=False):
     """Check feed. Return list of orphaned files."""
     for msg in feed.check(verbose=verbose):
-        messager.msg('{}: {}'.format(feed, msg))
+        messager.msg(f'{feed}: {msg}')
     return feed.get_orphans()
 
 
@@ -160,7 +160,7 @@ def add_url(url):
     feed.refresh(force=True)
     # check_feed(feed)
     if feed.directory.exists():
-        raise IOError('Feed directory exists: {}'.format(feed.directory))
+        raise IOError(f'Feed directory exists: {feed.directory}')
     feed.write()
     check_feed(feed)
     return feed.directory
@@ -203,9 +203,8 @@ def show_feed(feed, verbose=0):
         first = time_fmt(feed.entries[0].date, fmt='isodate')
         last = time_fmt(feed.entries[-1].date, fmt='isodate')
         lst.extend([
-            (fmt_strings('{} {}'.format(x.name, n_flagged(x)) for x in Flag),
-             'Flags'),
-            ('earliest {}, latest {}'.format(first, last), 'Range'),
+            (fmt_strings(f'{x.name} {n_flagged(x)}' for x in Flag), 'Flags'),
+            (f'earliest {first}, latest {last}', 'Range'),
             ])
     show(header, lst)
 
@@ -325,8 +324,8 @@ def play_enclosure(enc):
         if enc.path.exists():
             exit_code = enc.play()
         else:
-            messager.msg('File does not exist: {}'.format(enc.path))
-            messager.msg('Streaming: {}'.format(enc.href))
+            messager.msg(f'File does not exist: {enc.path}')
+            messager.msg(f'Streaming: {enc.href}')
             exit_code = enc.stream()
         messager.msg('Exit code:', exit_code)
         return exit_code
@@ -375,7 +374,7 @@ def drop_enc(entry):
     """Drop enclosure information from entry."""
     for enc in entry.encs():
         if enc.path.exists():
-            raise FileExistsError('Enclosure exists: {}'.format(enc.path))
+            raise FileExistsError(f'Enclosure exists: {enc.path}')
     del entry.enclosures
     entry.enclosures = []
     entry.feed.modified = True
