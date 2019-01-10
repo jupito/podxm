@@ -112,8 +112,8 @@ class Entry():
         d = dict(e=self, n=len(encs))
 
         if self.date > self.feed.head.date_seen:
-            yield ('{e}: Entry claims to be newer than feed: {e.date}' +
-                   ' > {e.feed.head.date_seen}').format(**d)
+            yield ('{e}: Entry claims to be newer than feed: '
+                   '{e.date} > {e.feed.head.date_seen}').format(**d)
 
         # if not self.subtitle:
         #     yield '{e}: Empty subtitle'.format(**d)
