@@ -202,6 +202,11 @@ def time_fmt(t=None, local=False, fmt='iso8601'):
             fmt = '%m-%d'
             if t.year != datetime.datetime.utcnow().year:
                 fmt = '%Y-' + fmt
+        elif fmt == 'compactdate_lettermonth':
+            month = chr(ord('A') + t.month - 1)
+            fmt = f'{month}%d'
+            if t.year != datetime.datetime.utcnow().year:
+                fmt = '%Y' + fmt
         return t.strftime(fmt)
     if isinstance(t, str):
         # Parse date from string.
