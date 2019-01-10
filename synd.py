@@ -83,6 +83,10 @@ class Feed():
             )
         return d
 
+    @property
+    def nentries(self):
+        return self._nentries
+
     def should_skip(self, gracetime=None):
         """Skip refresh or not? Gracetime given in hours."""
         tags = self.get_tags()
@@ -389,7 +393,7 @@ SORTKEYS = {
     'f': lambda entry: entry.flag.index(),
     'i': lambda entry: str(entry.feed.directory).lower(),
     'l': lambda entry: (entry.feed.head.language or 'zzz').lower(),
-    'n': lambda entry: entry.feed._nentries,
+    'n': lambda entry: entry.feed.nentries,
     'o': lambda entry: entry.feed.progress,
     'p': lambda entry: entry.feed.priority,
     'r': lambda entry: entry.progress,

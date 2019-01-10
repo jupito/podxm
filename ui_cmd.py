@@ -127,7 +127,7 @@ class UI(cmd.Cmd):
             # n=len(self.entries),
             iwidth=len(str(len(self.entries) - 1)),
             im=util.index_mark(i, self.entries),
-            nfe=entry.feed._nentries or -1,
+            nfe=entry.feed.nentries or -1,
             tfe=len(entry.feed.entries or []),
             flag=entry.flag.value,
             dir=entry.feed.directory,
