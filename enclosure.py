@@ -14,6 +14,15 @@ import util
 log = logging.getLogger(__name__)
 
 
+def _yle_suffix_kludge(path):
+    """TODO: Horrible kludge to adapt to varying prefix."""
+    if path.suffix == '.flv':
+        mp3 = path.with_suffix('.mp3')
+        if mp3.exists():
+            return mp3
+    return path
+
+
 class Enclosure():
     """Feed entry enclosure."""
     def __init__(self, entry, href, length, typ):
@@ -61,7 +70,8 @@ class Enclosure():
     @lru_cache()
     def path(self):
         """Path on disk."""
-        return self.entry.feed.directory / self.filename
+        # return self.entry.feed.directory / self.filename
+        return _yle_suffix_kludge(self.entry.feed.directory / self.filename)
 
     def size(self):
         """Size on disk."""

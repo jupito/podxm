@@ -56,7 +56,7 @@ def download_yle(url: str, path: Path, sublang: str = None,
     # stream = tmpdir / 'stream.flv'
     stream = tmpdir / 'stream'
     # s = 'yle-dl --backend {be} --sublang {sublang} -o {o} {url}'
-    s = 'yle-dl --sublang {sublang} -o {o} {url}'
+    s = 'yle-dl --sublang {sublang} --maxbitrate best -o {o} {url}'
     d = dict(be=backend, sublang=sublang, o=stream.name, url=url)
     args = fmt_args(s, **d)
     logging.debug(args)
@@ -65,7 +65,12 @@ def download_yle(url: str, path: Path, sublang: str = None,
         return False
 
     # Move media file to destination.
-    move(stream.with_suffix('.flv'), path)
+    # move(stream.with_suffix('.flv'), path)
+    # TODO: Horrible kludge to adapt to varying prefix.
+    try:
+        move(stream.with_suffix('.flv'), path)
+    except FileNotFoundError:
+        move(stream.with_suffix('.mp3'), path.with_suffix('.mp3'))
 
     # Move any subtitles, too.
     for sub in iter_subfiles(stream):
