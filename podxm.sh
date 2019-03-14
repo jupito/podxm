@@ -27,6 +27,9 @@ _dirs() {
     _all)
         find . -maxdepth 1
         ;;
+    _fic)
+        find ./* -mindepth 1 -maxdepth 1 -type d -ipath '*/fiction*'
+        ;;
     _talk)
         #dirs_talk="$(find . -mindepth 1 -maxdepth 1 -type d \! -ipath './music*')"
         # find . -mindepth 2 -maxdepth 2 -type d \! -ipath '*/music*' \! -ipath '*/video*'
@@ -75,6 +78,7 @@ call_ui_t() { podxm -c ui -w ,1,D,SD -d $(_dirs talk); }
 call_ui_c() { podxm -c ui -w ,1,d,Sd -d $(_dirs complete); }
 #call_ui_m() { podxm -c ui -w ,2,SD=,Sd -d $(_dirs music); }
 call_ui_m() { podxm -c ui -w ,2,SD,SD -d $(_dirs music); }
+call_ui_fic() { podxm -c ui -w ,1,SD,SD -d $(_dirs fic); }
 call_ui_v() { podxm -c ui -w ,1,SD,fSD -d $(_dirs video); }
 call_ui_f() { podxm -c ui -w f,-1,,i -d ongoing/*; }
 call_ui_af() { podxm -c ui -w f,-1,,i -d "./*"; }
