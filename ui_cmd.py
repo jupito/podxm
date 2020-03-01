@@ -12,6 +12,7 @@ import common
 import synd
 import util
 from common import View
+from misctypes import EntryFilter
 from synd import Flag
 
 log = logging.getLogger(__name__)
@@ -277,11 +278,14 @@ class UI(cmd.Cmd):
 
     def do_view(self, arg):
         """Show info on entry."""
+        verbose = 2
         targets = arg or 'e'
+        if 'v' in targets:
+            verbose += 1
         if 'f' in targets:
-            common.show_feed(self.feed, verbose=2)
+            common.show_feed(self.feed, verbose=verbose)
         if 'e' in targets:
-            common.show_entry(self.entry, verbose=2)
+            common.show_entry(self.entry, verbose=verbose)
             if self.entry.flag == Flag.fresh:
                 messager.feedback('Flagging fresh entry as new.')
                 self.entry.set_flag(Flag.new)
@@ -321,6 +325,7 @@ class UI(cmd.Cmd):
         """Normalize volume."""
         # force = bool(int(arg or 0))
         force = str_as_bool(arg, False)
+        common.download_enclosures(self.entry)
         common.normalize_enclosures(self.entry, force=force)
 
     def do_play(self, arg):
@@ -330,6 +335,14 @@ class UI(cmd.Cmd):
         # common.show_entry(self.entry, verbose=2)
         common.download_enclosures(self.entry)
         common.normalize_enclosures(self.entry)
+        common.play_enclosures(self.entry, set_flag=set_flag)
+        self.feed.write()
+
+    def do_stream(self, arg):
+        """Stream enclosures, flag as open if successful."""
+        # set_flag = bool(int(arg or 1))
+        set_flag = str_as_bool(arg, True)
+        # common.show_entry(self.entry, verbose=2)
         common.play_enclosures(self.entry, set_flag=set_flag)
         self.feed.write()
 
@@ -396,6 +409,12 @@ class UI(cmd.Cmd):
         self.read_data()
         self.jump(guid, url)
 
+    def do_filter(self, arg):
+        """Filter results."""
+        flt = EntryFilter.parse(arg)
+        messager.feedback(f'Filtering by {flt}')
+        self.entries = list(filter(flt.ok, self.entries))
+
     def do_sync(self, arg):
         """General synchronize."""
         if not arg:
@@ -410,10 +429,15 @@ class UI(cmd.Cmd):
             messager.msg(n)
             # TODO
 
-    do_N = do_nextfeed
+    def do_breakpoint(self, arg):
+        """Debug."""
+        breakpoint()
+
     do_b = do_back
     do_dl = do_download
+    do_f = do_filter
     do_g = do_go
+    do_N = do_nextfeed
     do_l = do_list
     do_n = do_next
     do_nl = do_normalize
