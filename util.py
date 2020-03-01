@@ -20,6 +20,7 @@ import slugify  # This is awesome-slugify, not python-slugify.
 import tabulate
 
 import pyutils.misc
+from jupitotools.time import fmt_duration, timedelta_floatdays
 
 T = TypeVar('T')
 KT = TypeVar('KT')
@@ -243,17 +244,6 @@ def fmt_datetime(dt, fmt='iso8601'):
     return dt.strftime(fmt)
 
 
-def fmt_duration(td):
-    """Format media duration, represented by a timedelta."""
-    # td = datetime.timedelta(seconds=td.seconds)  # Drop microseconds.
-    # return str(td)
-    if td is None:
-        return '?:?'
-    hours, secs = divmod(td.total_seconds(), 60**2)
-    mins = round(secs / 60)
-    return f'{int(hours)}:{mins:02}'
-
-
 def fmt_strings(iterable, sep=', '):
     """Format an iterable of objects as strings."""
     return sep.join(str(x) for x in iterable)
@@ -262,15 +252,10 @@ def fmt_strings(iterable, sep=', '):
 def timedelta_stats(deltas, funcs=None):
     """Calculate statistic from a sequence of timedeltas."""
     if funcs is None:
-        funcs = (min, median, max, mean, stdev)
+        funcs = min, median, max, mean, stdev
     deltas_sec = [x.total_seconds() for x in deltas]
-    return OrderedDict((f.__name__, datetime.timedelta(seconds=f(deltas_sec)))
-                       for f in funcs)
-
-
-def timedelta_floatdays(timedelta):
-    """Return timedelta days as float."""
-    return timedelta.total_seconds() / 60 / 60 / 24
+    return dict((f.__name__, datetime.timedelta(seconds=f(deltas_sec)))
+                for f in funcs)
 
 
 def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
