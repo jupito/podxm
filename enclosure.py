@@ -3,6 +3,8 @@
 import logging
 from functools import lru_cache
 
+from jupitotools.media.ylemedia import YleMedia
+
 import media
 import pyutils.files
 import pyutils.net
@@ -115,6 +117,9 @@ class Enclosure():
         for path in self.path.parent.glob(f'{self.path.stem}.*.srt'):
             logging.warning('Removing subtitle: %s', path)
 
+    def expire_time(self):
+        return None
+
 
 class YleEnclosure(Enclosure):
     """Yle media. No streaming support."""
@@ -136,6 +141,10 @@ class YleEnclosure(Enclosure):
     def sublang(self):
         """Return subtitle language."""
         return self.entry.get_tags().get('sub')
+
+    def expire_time(self):
+        ylemedia = YleMedia(self.href)
+        return ylemedia.expire_time()
 
 
 class YoutubeEnclosure(Enclosure):
