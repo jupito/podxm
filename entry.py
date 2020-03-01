@@ -4,6 +4,7 @@ import logging
 import webbrowser
 from functools import lru_cache, total_ordering
 
+from boltons.strutils import html2text
 from pyutils.misc import int_or_float
 
 import util
@@ -42,6 +43,7 @@ class Entry():
         return self.date < other.date
 
     def as_json(self):
+        """Serialize as JSON."""
         d = dict(self.__dict__)
         del d['feed']
         d['progress'] = d.pop('_progress')
@@ -61,6 +63,14 @@ class Entry():
             title = title.replace(self.feed.head.title + ': ', ellipsis)
             title = title.replace(self.feed.head.title, ellipsis)
         return title
+
+    def description(self):
+        """Join subtitle and summary, while discarding overlapping part."""
+        subt, summ = (html2text(x or '').strip() for x in (self.subtitle,
+                                                           self.summary))
+        if summ.startswith(subt.rstrip('[]. …')):
+            return summ
+        return '\n—\n'.join((subt, summ))
 
     @property
     def score(self):
