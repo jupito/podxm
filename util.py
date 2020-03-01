@@ -10,7 +10,6 @@ import time
 from html.parser import HTMLParser
 from pathlib import Path
 from statistics import mean, median, stdev
-from typing import Callable, List, Mapping, Sequence, TypeVar
 
 import appdirs
 
@@ -21,8 +20,6 @@ import tabulate
 import pyutils.misc
 from jupitotools.time import fmt_duration, timedelta_floatdays
 
-T = TypeVar('T')
-KT = TypeVar('KT')
 log = logging.getLogger(__name__)
 
 
@@ -257,8 +254,7 @@ def timedelta_stats(deltas, funcs=None):
                 for f in funcs)
 
 
-def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
-                 reverses: Sequence[bool]) -> List:
+def general_sort(lst, keys, reverses):
     """A more general version of list.sort() that supports a number of key
     functions with independent reverse flags.
     """
@@ -266,13 +262,13 @@ def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
     #     values = sorted((key(x) for x in lst), reverse=reverse)
     #     indices.append({v: i for i, v in enumerate(values)})
 
-    def indexmap(key: Callable[[T], KT], reverse: bool) -> Mapping[KT, int]:
+    def indexmap(key, reverse):
         """Create mapping from key(item) to index when sorted."""
         values = sorted((key(x) for x in lst), reverse=reverse)
         return {v: i for i, v in enumerate(values)}
     maps = [indexmap(k, r) for k, r in zip(keys, reverses)]
 
-    def final_key(entry: T) -> List[int]:
+    def final_key(entry):
         """Construct sortkey for list.sort()."""
         return [m[k(entry)] for m, k in zip(maps, keys)]
     lst.sort(key=final_key)
