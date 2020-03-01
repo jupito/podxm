@@ -9,9 +9,9 @@ from collections import defaultdict
 from itertools import chain
 from pathlib import Path
 
-from pyutils.args import get_basic_parser
-from pyutils.files import tempfile_and_backup, valid_lines
-from pyutils.misc import get_loglevel, get_progname
+from jupitotools.args import get_basic_parser
+from jupitotools.files import tempfile_and_backup, valid_lines
+from jupitotools.misc import get_loglevel, get_progname
 
 import common
 import ui_cmd
