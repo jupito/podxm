@@ -279,36 +279,36 @@ def general_sort(lst: List[T], keys: Sequence[Callable[[T], KT]],
     return lst
 
 
-def slugify_filename(text, prefix='', suffix='', max_length=255):
-    """Slugify filename using awesome-slugify library."""
-    # TODO: Handle slug uniqueness (duplicate file names).
-
-    # pretranslate = None  # function or dict for replace before translation
-    # translate = unidecode.unidecode  # function for slugifying or None
-    # safe_chars = ''  # additional safe chars
-    # stop_words = ()  # remove these words from slug
-
-    # to_lower = False  # default to_lower value
-    # max_length = None  # default max_length value
-    # separator = '-'  # default separator value
-    # capitalize = False  # default capitalize value
-
-    # Custom slugifier based on slugify_unicode and slugify_filename.
-    custom_slugify = slugify.Slugify(
-        pretranslate={
-            '/': '-',
-            # ': ': '--',
-            '.': '',
-        },
-        translate=None,
-        safe_chars='-.',
-        # stop_words=('a', 'an', 'the'),
-        to_lower=True,
-        max_length=max_length-len(prefix)-len(suffix),
-        separator='_',
-        fold_abbrs=True,  # Turns "e.g." to "eg" etc.
-    )
-    return prefix + custom_slugify(text) + suffix
+# def slugify_filename(text, prefix='', suffix='', max_length=255):
+#     """Slugify filename using awesome-slugify library."""
+#     # TODO: Handle slug uniqueness (duplicate file names).
+#
+#     # pretranslate = None  # function or dict for replace before translation
+#     # translate = unidecode.unidecode  # function for slugifying or None
+#     # safe_chars = ''  # additional safe chars
+#     # stop_words = ()  # remove these words from slug
+#
+#     # to_lower = False  # default to_lower value
+#     # max_length = None  # default max_length value
+#     # separator = '-'  # default separator value
+#     # capitalize = False  # default capitalize value
+#
+#     # Custom slugifier based on slugify_unicode and slugify_filename.
+#     custom_slugify = slugify.Slugify(
+#         pretranslate={
+#             '/': '-',
+#             # ': ': '--',
+#             '.': '',
+#         },
+#         translate=None,
+#         safe_chars='-.',
+#         # stop_words=('a', 'an', 'the'),
+#         to_lower=True,
+#         max_length=max_length-len(prefix)-len(suffix),
+#         separator='_',
+#         fold_abbrs=True,  # Turns "e.g." to "eg" etc.
+#     )
+#     return prefix + custom_slugify(text) + suffix
 
 
 def fmt_table(rows):

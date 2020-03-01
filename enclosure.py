@@ -60,13 +60,13 @@ class Enclosure():
         name = name.replace('/', '%')
         return name
 
-    @property
-    @lru_cache()
-    def filename_slugified(self):
-        """Filename on disk."""
-        date_str = util.time_fmt(self.entry.date, fmt='isodate') + '_'
-        return util.slugify_filename(self.entry.title, prefix=date_str,
-                                     suffix=self.suffix, max_length=80)
+    # @property
+    # @lru_cache()
+    # def filename_slugified(self):
+    #     """Filename on disk."""
+    #     date_str = util.time_fmt(self.entry.date, fmt='isodate') + '_'
+    #     return util.slugify_filename(self.entry.title, prefix=date_str,
+    #                                  suffix=self.suffix, max_length=80)
 
     @property
     @lru_cache()
