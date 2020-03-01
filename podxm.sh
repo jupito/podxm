@@ -4,14 +4,44 @@
 
 set -e
 
-# shellcheck disable=SC1090
-. ~/bin/def.sh
+## shellcheck disable=SC1090
+#. ~/bin/def.sh
 
 njobs=2
 podcasts_dir=~/podcasts
 playlist_dir=~/Music/playlists
 portable_podcasts_dir=~/jolla/Music/podcasts
 portable_playlist_dir=~/jolla/Music/playlists
+
+_prg_name() { basename "$0"; }  # Get program name.
+_prg_edit() { ${VISUAL:-"vi"} "$0"; }  # Edit program code.
+_prg_help() { grep '^\s\+[-|_a-zA-Z]\+)' "$0"; }  # Show `case` branches.
+_echo_err() { echo "$*" > /dev/stderr; }  # Echo to stderr.
+
+# Get a temporary file name (without creating it).
+_tmpfile() {
+    mktemp -u --tmpdir "tmp.$(_prg_name).XXXXXXXXXX"
+}
+
+# Call function _call_$x for each argument $x.
+_do_args() {
+    _do_arg() {
+        case "$1" in
+        help|edit)
+            "_prg_$1"
+            exit
+            ;;
+        *)
+            # _echo_err "Unknown argument: $1"
+            "_call_$1"
+            ;;
+        esac
+    }
+
+    for arg; do
+        _do_arg "$arg"
+    done
+}
 
 _xe() { reallynice xe -j "$njobs" "$@"; }
 _xe1() { reallynice xe -j 1 "$@"; }
@@ -57,13 +87,13 @@ _dirs() {
         echo ./*/*/in_our_time*
         ;;
     *)
-        eecho "Invalid directory specifier: $1"
+        _echo_err "Invalid directory specifier: $1"
         exit 1
         ;;
     esac
 }
 
-call_refresh() {
+_call_refresh() {
     # Refresh all feeds in parallel.
     #parallel-moreutils -j10 -n10 podxm -c refresh -d -- */*
     #find . -mindepth 2 -type d -print0 | xargs -0 -L25 -P4 podxm -v -c refresh -d
@@ -74,27 +104,27 @@ call_refresh() {
 }
 
 # shellcheck disable=SC2046
-call_ui_t() { podxm -c ui -w ,1,D,SD -d $(_dirs talk); }
-call_ui_c() { podxm -c ui -w ,1,d,Sd -d $(_dirs complete); }
-#call_ui_m() { podxm -c ui -w ,2,SD=,Sd -d $(_dirs music); }
-call_ui_m() { podxm -c ui -w ,2,SD,SD -d $(_dirs music); }
-call_ui_fic() { podxm -c ui -w ,1,SD,SD -d $(_dirs fic); }
-call_ui_v() { podxm -c ui -w ,1,SD,fSD -d $(_dirs video); }
-call_ui_f() { podxm -c ui -w f,-1,,i -d ongoing/*; }
-call_ui_af() { podxm -c ui -w f,-1,,i -d "./*"; }
-call_ui_current() { podxm -c ui -w ,1,D,SD -d $(_dirs current); }
-call_ui_d() { podxm -c ui -w foina,1,d,Sd -d $(_dirs 'done'); }
-call_ui_iot() { podxm -c ui -w foin,-1,d,d -d $(_dirs iot); }
+_call_ui_t() { podxm -c ui -w ,1,D,SD -d $(_dirs talk); }
+_call_ui_c() { podxm -c ui -w ,1,d,Sd -d $(_dirs complete); }
+#_call_ui_m() { podxm -c ui -w ,2,SD=,Sd -d $(_dirs music); }
+_call_ui_m() { podxm -c ui -w ,2,SD,SD -d $(_dirs music); }
+_call_ui_fic() { podxm -c ui -w ,1,SD,SD -d $(_dirs fic); }
+_call_ui_v() { podxm -c ui -w ,1,SD,fSD -d $(_dirs video); }
+_call_ui_f() { podxm -c ui -w f,-1,,i -d ongoing/*; }
+_call_ui_af() { podxm -c ui -w f,-1,,i -d "./*"; }
+_call_ui_current() { podxm -c ui -w ,1,D,SD -d $(_dirs current); }
+_call_ui_d() { podxm -c ui -w foina,1,d,Sd -d $(_dirs 'done'); }
+_call_ui_iot() { podxm -c ui -w foin,-1,d,d -d $(_dirs iot); }
 
-call_dl_t() { reallynice podxm -c dl -w n,1,D,SD -d $(_dirs talk); }
-call_dl_c() { reallynice podxm -c dl -w n,1,d,Sd -d $(_dirs complete); }
-call_dl_m() { reallynice podxm -c dl -w n,1,d,Sd -d $(_dirs music); }
-call_dl_v() { reallynice podxm -c dl -w n,1,d,Sd -d $(_dirs video); }
-call_dl_i() { reallynice podxm -c dl -w oia,-1,,SD --force -d ./*; }
+_call_dl_t() { reallynice podxm -c dl -w n,1,D,SD -d $(_dirs talk); }
+_call_dl_c() { reallynice podxm -c dl -w n,1,d,Sd -d $(_dirs complete); }
+_call_dl_m() { reallynice podxm -c dl -w n,1,d,Sd -d $(_dirs music); }
+_call_dl_v() { reallynice podxm -c dl -w n,1,d,Sd -d $(_dirs video); }
+_call_dl_i() { reallynice podxm -c dl -w oia,-1,,SD --force -d ./*; }
 
-#call_norm() { reallynice podxm -c norm -w foina,-1,,SD -d ./*; }
-call_norm() { njobs=1 _dirs all | _xe1 podxm -c norm -w foina,-1,,SD -d; }
-call_check() { _dirs all | _xe podxm -c check -w foinad,-1,, -d .; }  # TODO: Do only once
+#_call_norm() { reallynice podxm -c norm -w foina,-1,,SD -d ./*; }
+_call_norm() { njobs=1 _dirs all | _xe1 podxm -c norm -w foina,-1,,SD -d; }
+_call_check() { _dirs all | _xe podxm -c check -w foinad,-1,, -d .; }  # TODO: Do only once
 
 _sync_playlists() {
     echo "Syncing playlists..."
@@ -131,16 +161,16 @@ _sync_podcasts() {
     _du "$dst"
 }
 
-call_sync() {
+_call_sync() {
     _sync_playlists
     _sync_podcasts 0current
-    _sync_podcasts fiction
     _sync_podcasts history
+    _sync_podcasts lang
     _sync_podcasts misc
-    _sync_podcasts music
     _sync_podcasts science
+    _sync_podcasts soc
     _du "$portable_podcasts_dir"
 }
 
 cd "$podcasts_dir"
-do_args "$@"
+_do_args "$@"
