@@ -187,6 +187,7 @@ def show_feed(feed, verbose=0):
             (time_fmt(feed.head.date, fmt='rfc2822'), 'Date'),
             (feed.priority, 'Priority'),
             (feed.head.link, 'Link'),
+            (feed.url, 'Feed'),
             (t_bold(feed.head.title), 'Title'),
             (feed.head.subtitle, 'Subt'),
             (feed.head.summary, 'Summ'),
@@ -234,8 +235,7 @@ def show_entry(entry, verbose=0):
             (term_bool(is_uuid(entry.guid))(entry.guid), 'GUID'),
             (entry.link, 'Link'),
             (t_bold(entry.title), 'Title'),
-            (entry.subtitle, 'Subt'),
-            (html2text(entry.summary), 'Summ'),
+            (entry.description(), 'Desc'),
             (str(entry.get_tags()), 'Tags'),
             ])
         for enc in entry.encs():
@@ -252,8 +252,14 @@ def show_entry(entry, verbose=0):
             lst.append((enc.filename, '#Name'))
             # lst.append((enc.filename_slugified, '#Slug'))
             ##
+            if verbose > 2:
+                lst.extend([
+                    (enc.expire_time(), 'Expire'),
+                    (entry.subtitle, 'Subt'),
+                    (html2text(entry.summary or ''), 'Summ'),
+                    ])
     show(header, lst)
-    # messager.msg(WRAPPER.fills(html2text(entry.summary)))
+    # messager.msg(WRAPPER.fills(html2text(entry.summary or '')))
 
 
 def show_files(entry, verbose=0):
@@ -281,7 +287,7 @@ def show_enclosures(entry):
 
 
 def download_enclosure(enc, maxsize=None):
-    """Download enclosure."""
+    """Download enclosure, return whether download was successful."""
     if enc.path.exists():
         log.debug('Already exists: %s', enc.path)
     elif enc.is_too_big(maxsize):
@@ -293,18 +299,21 @@ def download_enclosure(enc, maxsize=None):
         # messager.msg('Downloading {}: {}'.format(fmt_size(enc.length),
         #                                          enc.path), truncate=True)
         try:
-            if not enc.download():
-                log.error('Download failed: %s', enc.path)
+            if enc.download():
+                return True
+            log.error('Download failed: %s', enc.path)
         except NotImplementedError:
             log.debug('Download not implemented: %s', enc)
         except KeyboardInterrupt:
             log.error('Download interrupted: %s', enc)
+    return False
 
 
 def download_enclosures(entry, maxsize=None):
     """Download entry enclosures."""
     for enc in entry.encs():
-        download_enclosure(enc, maxsize=maxsize)
+        if download_enclosure(enc, maxsize=maxsize):
+            print(pyutils.misc.ring_bell(), flush=True)
 
 
 def normalize_enclosure(enc, force=False):
@@ -360,7 +369,6 @@ def remove_enclosure(enc):
     """Remove enclosure from disk."""
     if enc.path.exists():
         messager.msg('Removing:', enc.path)
-        # enc.path.unlink()
         pyutils.files.trash_or_rm(enc.path)
 
 
