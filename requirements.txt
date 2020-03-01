@@ -1,3 +1,5 @@
 appdirs
 dateutil
 feedparser
+slugify
+tabulate
