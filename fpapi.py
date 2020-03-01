@@ -19,7 +19,8 @@ def get_now():
 def get_title(fp):
     """Read title."""
     title = fp.title
-    assert title, fp
+    # assert title, (str(title), fp)
+    assert title is not None, (str(title), fp)
     return title
 
 
