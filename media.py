@@ -71,6 +71,10 @@ def download_yle(url: str, path: Path, sublang: str = None,
         move(stream.with_suffix('.flv'), path)
     except FileNotFoundError:
         move(stream.with_suffix('.mp3'), path.with_suffix('.mp3'))
+        # try:
+        #     move(stream.with_suffix('.mp3'), path.with_suffix('.mp3'))
+        # except FileNotFoundError:
+        #     move(stream.with_suffix('.mp4'), path.with_suffix('.mp4'))
 
     # Move any subtitles, too.
     for sub in iter_subfiles(stream):
