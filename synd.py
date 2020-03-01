@@ -184,11 +184,8 @@ class Feed():
         assert len(present) < 2, len(present)
         if not present:
             # log.warning('Adding entry: %s: %s', self, entry)
-            messager.msg(f'Adding entry: {self}: {entry}', truncate=True)
-            # ##
-            # import shutil
-            # print('####', shutil.get_terminal_size().columns)
-            # ##
+            # messager.msg(f'Adding entry: {self}: {entry}', truncate=True)
+            messager.msg(f'{self} ← {entry}', truncate=True)
             self.entries.append(entry)
             return True
         old = present[0]
@@ -354,6 +351,8 @@ class Feed():
     @property
     @lru_cache()
     def progress(self):
+        """Feed average progress."""
+        # FIXME: This only looks at loaded entries, not all entries.
         if not self.entries:
             return 0
         return mean(x.progress for x in self.entries)
