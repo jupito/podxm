@@ -1,11 +1,15 @@
 """Misc types."""
 
+import datetime
 import logging
+# from dataclasses import dataclass  # , astuple, fields
 from enum import Enum, unique
 from functools import total_ordering
 
 import attr
 from attr.validators import in_, instance_of, optional
+
+# from jupitotools.time import Datetime
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +40,7 @@ class Flag(Enum):
 
     def score(self):
         """Score associated with flag."""
-        return (self.index() - 3) * -100
+        return (self.index() - 3) * -10
 
     def as_json(self):
         """Represent as JSON (one-way conversion)."""
@@ -63,7 +67,7 @@ class TagDict(dict):
     def split_tag(tag, sep='=', default=None):
         """Split tag string into key and value. Return None on error."""
         try:
-            k, v = tag.split(sep, 2)
+            k, v = tag.split(sep, 1)
         except ValueError:
             k, v = tag, default
         k = TagDict.normalize_tag(k)
@@ -83,7 +87,7 @@ class TagDict(dict):
 @attr.s(frozen=True)
 class Gain():
     """ReplayGain level."""
-    value = attr.ib(validator=instance_of(float), convert=float)
+    value = attr.ib(validator=instance_of(float), converter=float)
     unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
 
     def __str__(self):
@@ -113,3 +117,24 @@ class Lang():
     @classmethod
     def parse(cls, s):
         return cls(*s.split('_'))
+
+
+# @dataclass(frozen=True, order=True)
+class EntryFilter:
+    """..."""
+    # TODO
+    def __init__(self, max_age):
+        self.max_age = max_age
+
+    def __str__(self):
+        return f'age ≤ {self.max_age}'
+
+    @classmethod
+    def parse(cls, s):
+        s = s.strip() or '7'
+        return cls(max_age=datetime.timedelta(days=int(s)))
+
+    def ok(self, entry):
+        now = datetime.datetime.now()
+        limit = now - self.max_age
+        return entry.date >= limit
