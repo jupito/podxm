@@ -14,7 +14,7 @@ from statistics import mean, median, stdev
 import appdirs
 
 import dateutil.parser
-import slugify  # This is awesome-slugify, not python-slugify.
+# import slugify  # This is awesome-slugify, not python-slugify.
 import tabulate
 
 import pyutils.misc
