@@ -57,8 +57,8 @@ _dirs() {
     _all)
         find . -maxdepth 1
         ;;
-    _fic)
-        find ./* -mindepth 1 -maxdepth 1 -type d -ipath '*/fiction*'
+    _drama)
+        find ./* -mindepth 1 -maxdepth 1 -type d -ipath '*/drama*'
         ;;
     _talk)
         #dirs_talk="$(find . -mindepth 1 -maxdepth 1 -type d \! -ipath './music*')"
@@ -100,7 +100,7 @@ _call_refresh() {
     ##nlines=10
     #nlines=1
     #find ongoing* -mindepth 2 -type d -print0 | xargs -0 -L"$nlines" -P"$njobs" podxm -c refresh -d
-    find ongoing -mindepth 2 -type d | _xe podxm -c refresh -d
+    find ongoing -mindepth 2 -type d | sort | _xe podxm -c refresh -d
 }
 
 # shellcheck disable=SC2046
@@ -108,7 +108,7 @@ _call_ui_t() { podxm -c ui -w ,1,D,SD -d $(_dirs talk); }
 _call_ui_c() { podxm -c ui -w ,1,d,Sd -d $(_dirs complete); }
 #_call_ui_m() { podxm -c ui -w ,2,SD=,Sd -d $(_dirs music); }
 _call_ui_m() { podxm -c ui -w ,2,SD,SD -d $(_dirs music); }
-_call_ui_fic() { podxm -c ui -w ,1,SD,SD -d $(_dirs fic); }
+_call_ui_drama() { podxm -c ui -w ,1,SD,SD -d $(_dirs drama); }
 _call_ui_v() { podxm -c ui -w ,1,SD,fSD -d $(_dirs video); }
 _call_ui_f() { podxm -c ui -w f,-1,,i -d ongoing/*; }
 _call_ui_af() { podxm -c ui -w f,-1,,i -d "./*"; }
@@ -164,10 +164,11 @@ _sync_podcasts() {
 _call_sync() {
     _sync_playlists
     _sync_podcasts 0current
-    _sync_podcasts history
+    _sync_podcasts hist
+    _sync_podcasts hum
     _sync_podcasts lang
     _sync_podcasts misc
-    _sync_podcasts science
+    _sync_podcasts sci
     _sync_podcasts soc
     _du "$portable_podcasts_dir"
 }
