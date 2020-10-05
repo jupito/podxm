@@ -172,7 +172,14 @@ def play_file(path: Path, start=None) -> int:
 
 def play_stream(url: str) -> int:
     """Play media."""
+    # TODO: Obsolete, replace wth `stream()`. Just check those arguments...
     af = '--af=volume=replaygain-track:detach'
     ad = '--audio-display=no'
     args = fmt_args('mpv {af} {ad} {url}', af=af, ad=ad, url=url)
+    return call(args)
+
+
+def stream(url):
+    """Stream media."""
+    args = fmt_args('0stream {url}', url=url)
     return call(args)

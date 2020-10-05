@@ -136,7 +136,7 @@ class YleEnclosure(Enclosure):
                                   verbose=True)
 
     def stream(self):
-        raise NotImplementedError()
+        return media.stream(self.href)
 
     def sublang(self):
         """Return subtitle language."""
