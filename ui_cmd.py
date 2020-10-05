@@ -453,18 +453,21 @@ class UI(cmd.Cmd):
 
 def encs_char(entry):
     """Return a single-character enclosure status string."""
+    # TODO: No need to assume multi-enclosure is normal.
     encs = list(entry.encs())
     nencs = len(encs)
-    ndownloaded = sum(x.path.exists() for x in encs)
-    nnormalized = sum(x.is_normalized() for x in encs)
     if not encs:
         return '-'
+    if any(x.path.exists() and x.size() == 0 for x in encs):  # Empty files.
+        return '!'
     if nencs > 9:
         return '+'
+    ndownloaded = sum(x.path.exists() for x in encs)
     if ndownloaded == 0:
         return str(nencs)
     if nencs != ndownloaded:
         return chr(ord('a') + ndownloaded)
+    nnormalized = sum(x.is_normalized() for x in encs)
     return chr(ord('A') + nnormalized)
 
 
