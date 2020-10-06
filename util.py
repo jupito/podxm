@@ -180,6 +180,12 @@ class HTMLStripper(HTMLParser):
         return parser.get_data()
 
 
+def month_letter(i):
+    """Represent month as an easily graspable letter (a-f, o-t)."""
+    # return 'abcdefopqrst'[i-1]
+    return 'abcijkpqrxyz'[i-1]
+
+
 def time_fmt(t=None, local=False, fmt='iso8601'):
     """Format time represented as seconds since the epoch."""
     formats = dict(
@@ -200,7 +206,7 @@ def time_fmt(t=None, local=False, fmt='iso8601'):
             if t.year != datetime.datetime.utcnow().year:
                 fmt = '%Y-' + fmt
         elif fmt == 'compactdate_lettermonth':
-            month = chr(ord('A') + t.month - 1)
+            month = month_letter(t.month)
             fmt = f'{month}%d'
             if t.year != datetime.datetime.utcnow().year:
                 fmt = '%Y' + fmt
