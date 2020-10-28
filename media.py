@@ -7,7 +7,6 @@ import shlex
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Iterable, Sequence, Union
 
 from misctypes import Gain
 from pyutils.files import XAttrStr, move
@@ -16,12 +15,12 @@ from pyutils.misc import fmt_args
 log = logging.getLogger(__name__)
 
 
-def call(args: Sequence[str]) -> int:
+def call(args):
     log.info('Running: %s', ' '.join(args))
     return subprocess.call(args)
 
 
-def check_output(args: Sequence[str], **kwargs) -> str:
+def check_output(args, **kwargs):
     log.info('Running: %s', ' '.join(args))
     try:
         return subprocess.check_output(args, universal_newlines=True, **kwargs)
@@ -34,11 +33,9 @@ def check_output(args: Sequence[str], **kwargs) -> str:
         return None
 
 
-def download_yle(url: str, path: Path, sublang: str = None,
-                 tmpdir: Path = None, verbose: bool = True,
-                 # backend: str = 'youtubedl,rtmpdump'
-                 backend: str = 'wget,ffmpeg'
-                 ) -> bool:
+def download_yle(url, path, sublang=None, tmpdir=None, verbose=True,
+                 # backend='youtubedl,rtmpdump'
+                 backend='wget,ffmpeg'):
     """Download file from Yle Areena. Return True if succesful.
 
     `sublang` can be fin, swe, smi, none or all. TODO: changed???
@@ -85,12 +82,12 @@ def download_yle(url: str, path: Path, sublang: str = None,
     return True
 
 
-def iter_subfiles(path: Path) -> Iterable[Path]:
+def iter_subfiles(path):
     """Glob any subtitle files downloaded with mediafile."""
     return path.parent.glob(f'{path.name}.*.srt')
 
 
-def get_media_info(path: Path) -> dict:
+def get_media_info(path):
     """Return information about media file as a dictionary."""
     s = '''ffprobe
         -hide_banner -loglevel fatal
@@ -107,7 +104,7 @@ def get_media_info(path: Path) -> dict:
     return json.loads(output)
 
 
-def get_duration(path: Path) -> Union[datetime.timedelta, None]:
+def get_duration(path):
     """Return media duration in seconds."""
     d = get_media_info(path)
     try:
@@ -117,7 +114,7 @@ def get_duration(path: Path) -> Union[datetime.timedelta, None]:
     return datetime.timedelta(seconds=seconds)
 
 
-def normalize_volume(path: Path) -> int:
+def normalize_volume(path):
     """Normalize volume."""
     # args = fmt_args('volnorm -s {path}', path=path)
     quoted = shlex.quote(str(path))
@@ -126,7 +123,7 @@ def normalize_volume(path: Path) -> int:
     return call(args)
 
 
-def get_gain(path: Path) -> Union[Gain, None]:
+def get_gain(path):
     """Get ReplayGain level."""
     key = 'user.loudness.replaygain_track_gain'
     try:
@@ -140,7 +137,7 @@ def get_gain(path: Path) -> Union[Gain, None]:
     return gain
 
 
-def play_file(path: Path, start=None) -> int:
+def play_file(path, start=None):
     """Play media."""
     gain = get_gain(path)
 
@@ -170,7 +167,7 @@ def play_file(path: Path, start=None) -> int:
     return call(args)
 
 
-def play_stream(url: str) -> int:
+def play_stream(url):
     """Play media."""
     # TODO: Obsolete, replace wth `stream()`. Just check those arguments...
     af = '--af=volume=replaygain-track:detach'
