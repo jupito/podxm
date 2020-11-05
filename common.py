@@ -4,7 +4,6 @@ import logging
 import shlex
 from pathlib import Path
 
-from blessings import Terminal
 from boltons.strutils import bytes2human, html2text, is_uuid
 from boltons.timeutils import relative_time
 
@@ -21,7 +20,6 @@ from util import fmt_strings, fmt_duration, fmt_table, time_fmt
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
-term = Terminal()
 
 WRAPPER = util.MultiWrapper(
     width=79,
@@ -169,7 +167,6 @@ def add_url(url):
 def show(header, seq, wrapper=WRAPPER):
     """Show bodies of text prettily, using a TextWrapper object."""
     if header:
-        # messager.msg(term.on_bright_green, *header, term.normal, sep=' ▶ ')
         messager.msg(*header, sep=' ▶ ')
     # for text, title in seq:
     #     messager.msg(wrapper.fills(text, title+':'))
@@ -179,7 +176,6 @@ def show(header, seq, wrapper=WRAPPER):
 
 def show_feed(feed, verbose=0):
     """Show feed."""
-    t_bold = term.bold
     header = [feed.directory, feed.url]
     lst = []
     if verbose:
@@ -188,7 +184,7 @@ def show_feed(feed, verbose=0):
             (feed.priority, 'Priority'),
             (feed.head.link, 'Link'),
             (feed.url, 'Feed'),
-            (t_bold(feed.head.title), 'Title'),
+            (feed.head.title, 'Title'),
             (feed.head.subtitle, 'Subt'),
             (feed.head.summary, 'Summ'),
             # (feed.head.language or 'unknown', 'Language'),
@@ -217,11 +213,6 @@ def fmt_time(t):
 
 def show_entry(entry, verbose=0):
     """Show feed."""
-    t_bold = term.bold
-
-    def term_bool(x):
-        return term.green if x else term.red
-
     date_str = time_fmt(entry.date, fmt='isodate')
     header = [date_str, entry.feed.directory, entry.title]
     lst = []
@@ -232,9 +223,9 @@ def show_entry(entry, verbose=0):
             # (entry.score, 'Score'),
             (fmt_strings([entry.flag.name, entry.progress, entry.score]),
              'FlPrSc'),
-            (term_bool(is_uuid(entry.guid))(entry.guid), 'GUID'),
+            (entry.guid + (' ok' if is_uuid(entry.guid) else ' bad'), 'GUID'),
             (entry.link, 'Link'),
-            (t_bold(entry.title), 'Title'),
+            (entry.title, 'Title'),
             (entry.description(), 'Desc'),
             (str(entry.get_tags()), 'Tags'),
             ])
