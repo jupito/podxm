@@ -75,7 +75,9 @@ class Entry():
     @property
     def score(self):
         """Get entry score. Greater number => greater interest."""
-        return self.feed.priority + self.flag.score()
+        # def enc_score(self):
+        #     return self.enc.score() if self.enclosures else 0
+        return self.feed.priority + self.flag.score()  # + enc_score(self)
 
     @lru_cache()
     def get_tags(self):

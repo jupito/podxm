@@ -117,6 +117,14 @@ class Enclosure():
         for path in self.path.parent.glob(f'{self.path.stem}.*.srt'):
             logging.warning('Removing subtitle: %s', path)
 
+    def score(self):
+        """Enclosure score."""
+        if self.path.exists():
+            if self.is_normalized():
+                return 2
+            return 1
+        return 0
+
     def expire_time(self):
         return None
 
