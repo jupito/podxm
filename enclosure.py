@@ -10,9 +10,6 @@ import pyutils.files
 import pyutils.net
 import util
 
-# import attr
-# from attr.validators import in_, instance_of, optional
-
 log = logging.getLogger(__name__)
 
 
