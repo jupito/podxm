@@ -5,9 +5,10 @@ from functools import lru_cache
 
 from jupitotools.media.ylemedia import YleMedia
 
-import media
 import pyutils.files
 import pyutils.net
+
+import media
 import util
 
 log = logging.getLogger(__name__)
