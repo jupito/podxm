@@ -1,8 +1,8 @@
 """Misc types."""
 
+import dataclasses
 import datetime
 import logging
-from dataclasses import dataclass  # , astuple, fields
 from enum import Enum, unique
 from functools import total_ordering
 
@@ -121,29 +121,30 @@ class Lang():
         return cls(*s.split('_'))
 
 
-@dataclass(order=True, frozen=True)
+@dataclasses.dataclass(order=True, frozen=True)
 class Gain_:
     """ReplayGain level."""
-    value: float  # TODO: converter=float
-    unit: str = 'LU'  # TODO: validator=in_(['LU', 'dB']))
+    value: float
+    unit: str = 'LU'
 
     def __post_init__(self):
         assert isinstance(self.value, float), self.value
         assert self.unit in ['LU', 'dB'], self.unit
 
     def __str__(self):
-        return f'{self.value}{self.unit}'
+        return f'{self.value} {self.unit}'
 
     @classmethod
     def parse(cls, s):
-        return cls(*s.split())
+        args = s.split()
+        return cls(float(args[0]), *args[1:])
 
-    # TODO: replace
+    # TODO: Is this of any use?
     def _asdict(self):
-        raise NotImplementedError
+        return dataclasses.asdict(self)
 
 
-@dataclass(order=True, frozen=True)
+@dataclasses.dataclass(order=True, frozen=True)
 class Lang_:
     """Language (and maybe country) code."""
     lang: str
