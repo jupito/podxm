@@ -6,8 +6,8 @@ import logging
 from enum import Enum, unique
 from functools import total_ordering
 
-import attr
-from attr.validators import in_, instance_of, optional
+# import attr
+# from attr.validators import in_, instance_of, optional
 
 # from jupitotools.time import Datetime
 
@@ -84,45 +84,45 @@ class TagDict(dict):
         return len(k) and all(x.isalnum() or x in '_&/-:' for x in k)
 
 
-# TODO: replace
-@attr.s(frozen=True)
-class Gain():
-    """ReplayGain level."""
-    value = attr.ib(validator=instance_of(float), converter=float)
-    unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
-
-    def __str__(self):
-        return f'{self.value}{self.unit}'
-
-    @classmethod
-    def parse(cls, s):
-        return cls(*s.split())
-
-    def _asdict(self):
-        return attr.asdict(self)
-
-
-# TODO: replace
-@attr.s(frozen=True)
-class Lang():
-    """Language (and maybe country) code."""
-    lang = attr.ib(validator=instance_of(str))
-    country = attr.ib(default=None, validator=optional(instance_of(str)))
-
-    def __attrs_post_init__(self):
-        assert all(len(x) == 2 for x in filter(None, [self.lang,
-                                                      self.country])), self
-
-    def __str__(self):
-        return '_'.join(filter(None, [self.lang, self.country]))
-
-    @classmethod
-    def parse(cls, s):
-        return cls(*s.split('_'))
+# # TODO: replace
+# @attr.s(frozen=True)
+# class Gain():
+#     """ReplayGain level."""
+#     value = attr.ib(validator=instance_of(float), converter=float)
+#     unit = attr.ib(default='LU', validator=in_(['LU', 'dB']))
+#
+#     def __str__(self):
+#         return f'{self.value}{self.unit}'
+#
+#     @classmethod
+#     def parse(cls, s):
+#         return cls(*s.split())
+#
+#     def _asdict(self):
+#         return attr.asdict(self)
+#
+#
+# # TODO: replace
+# @attr.s(frozen=True)
+# class Lang():
+#     """Language (and maybe country) code."""
+#     lang = attr.ib(validator=instance_of(str))
+#     country = attr.ib(default=None, validator=optional(instance_of(str)))
+#
+#     def __attrs_post_init__(self):
+#         assert all(len(x) == 2 for x in filter(None, [self.lang,
+#                                                       self.country])), self
+#
+#     def __str__(self):
+#         return '_'.join(filter(None, [self.lang, self.country]))
+#
+#     @classmethod
+#     def parse(cls, s):
+#         return cls(*s.split('_'))
 
 
 @dataclasses.dataclass(order=True, frozen=True)
-class Gain_:
+class Gain:
     """ReplayGain level."""
     value: float
     unit: str = 'LU'
@@ -145,7 +145,7 @@ class Gain_:
 
 
 @dataclasses.dataclass(order=True, frozen=True)
-class Lang_:
+class Lang:
     """Language (and maybe country) code."""
     lang: str
     country: str = None
