@@ -2,7 +2,7 @@
 
 import datetime
 import logging
-# from dataclasses import dataclass  # , astuple, fields
+from dataclasses import dataclass  # , astuple, fields
 from enum import Enum, unique
 from functools import total_ordering
 
@@ -84,6 +84,7 @@ class TagDict(dict):
         return len(k) and all(x.isalnum() or x in '_&/-:' for x in k)
 
 
+# TODO: replace
 @attr.s(frozen=True)
 class Gain():
     """ReplayGain level."""
@@ -101,6 +102,7 @@ class Gain():
         return attr.asdict(self)
 
 
+# TODO: replace
 @attr.s(frozen=True)
 class Lang():
     """Language (and maybe country) code."""
@@ -119,7 +121,47 @@ class Lang():
         return cls(*s.split('_'))
 
 
-# @dataclass(frozen=True, order=True)
+@dataclass(order=True, frozen=True)
+class Gain_:
+    """ReplayGain level."""
+    value: float  # TODO: converter=float
+    unit: str = 'LU'  # TODO: validator=in_(['LU', 'dB']))
+
+    def __post_init__(self):
+        assert isinstance(self.value, float), self.value
+        assert self.unit in ['LU', 'dB'], self.unit
+
+    def __str__(self):
+        return f'{self.value}{self.unit}'
+
+    @classmethod
+    def parse(cls, s):
+        return cls(*s.split())
+
+    # TODO: replace
+    def _asdict(self):
+        raise NotImplementedError
+
+
+@dataclass(order=True, frozen=True)
+class Lang_:
+    """Language (and maybe country) code."""
+    lang: str
+    country: str = None
+
+    def __post_init__(self):
+        assert all(len(x) == 2 for x in filter(None, [self.lang,
+                                                      self.country])), self
+
+    def __str__(self):
+        return '_'.join(filter(None, [self.lang, self.country]))
+
+    @classmethod
+    def parse(cls, s):
+        return cls(*s.split('_'))
+
+
+# @dataclass(order=True, frozen=True)
 class EntryFilter:
     """..."""
     # TODO
