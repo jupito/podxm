@@ -369,8 +369,11 @@ class UI(cmd.Cmd):
         if not arg:
             messager.feedback('Argument needed.')
         else:
-            self.entry.set_flag(arg)
-            self.feed.write()
+            try:
+                self.entry.set_flag(arg)
+                self.feed.write()
+            except ValueError as e:
+                messager.feedback(e)
 
     def do_setprogress(self, arg):
         """Set entry flag."""
