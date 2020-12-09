@@ -223,7 +223,7 @@ def show_entry(entry, verbose=0):
             # (entry.score, 'Score'),
             (fmt_strings([entry.flag.name, entry.progress, entry.score]),
              'FlPrSc'),
-            (entry.guid + (' ok' if is_uuid(entry.guid) else ' bad'), 'GUID'),
+            (util.checkmark(is_uuid(entry.guid)) + ' ' + entry.guid, 'GUID'),
             (entry.link, 'Link'),
             (entry.title, 'Title'),
             (entry.description(), 'Desc'),

@@ -334,6 +334,10 @@ def fmt_table(rows):
     # rows = chain(fmt_row(x, y) for x, y in rows)
 
 
+def checkmark(value):
+    return '✓' if value else '✗'
+
+
 def index_mark(i, n):
     """Represent relative index as a character."""
     empty, first, last, error = '-', '•', '◘', '!'
