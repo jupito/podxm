@@ -335,7 +335,7 @@ def fmt_table(rows):
 
 
 def checkmark(value):
-    return '✓' if value else '✗'
+    return '✓ ' if value else '✗ '
 
 
 def index_mark(i, n):
