@@ -196,8 +196,7 @@ def time_fmt(t=None, local=False, fmt='iso8601'):
         rfc2822='%a, %d %b %Y %H:%M %z',
         locale='%c',
         )
-    if fmt in formats:
-        fmt = formats[fmt]
+    fmt = formats.get(fmt, fmt)
     if t is None:
         # t = time.time()
         return str(t)
