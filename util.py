@@ -18,7 +18,6 @@ import dateutil.parser
 import tabulate
 
 import pyutils.misc
-from jupitotools.time import fmt_duration
 
 log = logging.getLogger(__name__)
 

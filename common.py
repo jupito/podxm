@@ -7,6 +7,7 @@ from pathlib import Path
 from boltons.strutils import bytes2human, html2text, is_uuid
 from boltons.timeutils import relative_time
 
+from jupitotools.time import fmt_duration
 import pyutils.files
 import pyutils.misc
 # from pyutils.misc import fmt_size
@@ -16,7 +17,7 @@ import media
 import util
 from misctypes import Flag
 from synd import Feed
-from util import fmt_strings, fmt_duration, fmt_table, time_fmt
+from util import fmt_strings, fmt_table, time_fmt
 
 log = logging.getLogger(__name__)
 messager = util.Messager(__name__)
