@@ -13,6 +13,8 @@ except ImportError:
 from pathlib import Path
 from statistics import mean
 
+from jupitotools.time import timedelta_floatdays
+
 import common
 import fpapi
 import util
@@ -251,8 +253,8 @@ class Feed():
             raise ValueError(f'Not enough entries: {self}')
         deltas = [t2 - t1 for t1, t2 in zip(dates, dates[1:])]
         stats = util.timedelta_stats(deltas)
-        daydeltas = map(util.timedelta_floatdays, deltas)
-        daystats = map(util.timedelta_floatdays, stats.values())
+        daydeltas = map(timedelta_floatdays, deltas)
+        daystats = map(timedelta_floatdays, stats.values())
         names = stats.keys()
         return list(daydeltas), tuple(daystats), tuple(names)
 
