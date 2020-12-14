@@ -182,8 +182,9 @@ class HTMLStripper(HTMLParser):
 
 def month_letter(i):
     """Represent month as an easily graspable letter (a-f, o-t)."""
-    # return 'abcdefopqrst'[i-1]
-    return 'abcijkpqrxyz'[i-1]
+    # return ('abc' 'def' 'opq' 'rst')[i-1]
+    # return ('abc' 'ijk' 'pqr' 'xyz')[i-1]
+    return ('abc' 'def' 'uvw' 'xyz')[i-1]
 
 
 def time_fmt(t=None, local=False, fmt='iso8601'):
