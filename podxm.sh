@@ -1,6 +1,5 @@
 #!/bin/sh
-
-# Run podxm.
+# Helper script for running podxm.
 
 set -e
 
@@ -73,7 +72,7 @@ _dirs() {
     _video)
         find ./* -mindepth 1 -maxdepth 1 -type d -ipath '*/video*'
         ;;
-    _current)
+    _0|_current)
         echo ongoing*/0current*
         ;;
     _complete)
@@ -113,6 +112,7 @@ _call_ui_v() { podxm -c ui -w ,1,SD,fSD -d $(_dirs video); }
 _call_ui_f() { podxm -c ui -w f,-1,,i -d ongoing/*; }
 _call_ui_af() { podxm -c ui -w f,-1,,i -d "./*"; }
 _call_ui_current() { podxm -c ui -w ,1,D,SD -d $(_dirs current); }
+_call_ui_0() { podxm -c ui -w ,1,D,SD -d $(_dirs 0); }
 _call_ui_d() { podxm -c ui -w foina,1,d,Sd -d $(_dirs 'done'); }
 _call_ui_iot() { podxm -c ui -w foin,-1,d,d -d $(_dirs iot); }
 
